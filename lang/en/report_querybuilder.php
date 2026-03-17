@@ -49,7 +49,7 @@ $string['error_dangerous_keyword']  = 'Dangerous SQL keyword detected: ';
 
 // Capability
 $string['querybuilder:view']        = 'View Query Builder';
-
+$string['manage_entities'] = 'Manage Entities';
 
 
 $string['analyze_query']       = 'Analyze Query';
