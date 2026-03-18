@@ -65,3 +65,4 @@ $string['explain_no_warnings'] = 'No performance issues detected.';
 $string['explain_analyzing']   = 'Analyzing...';
 $string['explain_error']       = 'Could not analyze query: ';
 $string['enter_sql'] = 'Please enter a SQL query to analyze.';
+$string['all_categories'] = 'All categories';

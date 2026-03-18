@@ -130,7 +130,8 @@ if ($advanced) {
                     'categoryfilter' => $category // keep user in the same category
                 ]),
                 get_string('query_updated', 'report_querybuilder'),
-                2
+                null,
+		\core\output\notification::NOTIFY_SUCCESS
             );
         } else {
             query_manager::insert($savename, $query, $category);
@@ -140,7 +141,8 @@ if ($advanced) {
                     'categoryfilter' => $category // keep user in the same category
                 ]),
                 get_string('query_saved', 'report_querybuilder'),
-                2
+                null,
+		\core\output\notification::NOTIFY_SUCCESS
             );
         }
 
@@ -161,24 +163,10 @@ if ($saved) {
         }
     }
 }
+
 $selectedcategory = optional_param('categoryfilter', '', PARAM_TEXT);
 
-echo html_writer::start_tag('form', [
-    'method' => 'get',
-    'class'  => 'd-flex align-items-center gap-3 mb-3 flex-wrap',
-    'id'     => 'categoryfilterform'
-]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced', 'value' => 1]);
-echo html_writer::select(
-    ['' => 'All categories'] + $categories,
-    'categoryfilter',
-    $selectedcategory,
-    null,
-    ['class' => 'form-select me-2', 'onchange' => 'this.form.submit();']
-);
-echo html_writer::end_tag('form');
-
-// Filter saved queries
+// Filter saved queries by category
 $filtered = [];
 if ($saved) {
     foreach ($saved as $s) {
@@ -187,11 +175,12 @@ if ($saved) {
         }
     }
 }
-$options = ['' => 'Select saved query'];
+
+// Build options for saved query dropdown
+$options = ['' => get_string('select_saved_query', 'report_querybuilder')];
 foreach ($filtered as $s) {
     $options[$s->id] = $s->name . (!empty($s->category) ? ' (' . $s->category . ')' : '');
 }
-
 
 // Build JS object keyed by ID
 $filtered_by_id = [];
@@ -199,67 +188,116 @@ foreach ($filtered as $s) {
     $filtered_by_id[$s->id] = $s;
 }
 
+// ── Toolbar ───────────────────────────────────────────────────
+$categoryurl = new moodle_url('/report/querybuilder/index.php', [
+    'advanced'  => 1,
+    'loadquery' => $loadid,
+]);
+$categoryselectobj = new single_select(
+    $categoryurl,
+    'categoryfilter',
+    ['' => get_string('all_categories', 'report_querybuilder')] + $categories,
+    $selectedcategory,
+    null
+);
+$categoryselectobj->set_label(get_string('category', 'report_querybuilder'));
+echo $OUTPUT->render($categoryselectobj);
 
-        echo html_writer::start_tag('form', [
-            'method' => 'post',
-            'class'  => 'd-flex align-items-center gap-3 mb-3 flex-wrap',
-            'style'  => 'flex-wrap:wrap;',
-            'id'     => 'savedquerytoolbar'
-        ]);
+// Saved query selector — plain select, JS populates textarea on change
+echo html_writer::tag('label',
+    get_string('select_saved_query', 'report_querybuilder'),
+    ['class' => 'me-1']
+);
+echo html_writer::select(
+    $options,
+    'loadquery',
+    $loadid,
+    null,
+    ['id' => 'loadqueryselect', 'class' => 'form-select d-inline-block w-auto me-2']
+);
 
-	echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::start_div('d-flex gap-2 mb-3');
 
-        echo html_writer::select($options, 'loadquery', $loadid, null, [
-            'class' => 'form-select me-2',
-            'style' => 'width:auto; min-width:200px;',
-            'id'    => 'loadqueryselect'
-        ]);
+$newurl = new moodle_url('/report/querybuilder/index.php', [
+    'advanced'  => 1,
+    'newbutton' => 1,
+    'sesskey'   => sesskey(),
+]);
+echo $OUTPUT->single_button($newurl, get_string('btn_new', 'report_querybuilder'), 'get');
+
+// Edit form — action URL updated by JS when query selected
+echo html_writer::start_tag('form', [
+    'method' => 'post',
+    'id'     => 'editqueryform',
+    'action' => (new moodle_url('/report/querybuilder/index.php'))->out(false),
+]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',     'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced',    'value' => 1]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'loadquery',   'id'    => 'editloadquery', 'value' => $loadid]);
+echo html_writer::empty_tag('input', [
+    'type'     => 'submit',
+    'name'     => 'editbutton',
+    'value'    => get_string('btn_edit', 'report_querybuilder'),
+    'class'    => 'btn btn-outline-secondary',
+    'id'       => 'editquerybtn',
+    'disabled' => $loadid ? null : 'disabled',
+]);
+echo html_writer::end_tag('form');
+
+// Delete form
+echo html_writer::start_tag('form', [
+    'method' => 'post',
+    'id'     => 'deletequeryform',
+    'action' => (new moodle_url('/report/querybuilder/index.php'))->out(false),
+]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',     'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced',    'value' => 1]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'loadquery',   'id'    => 'deleteloadquery', 'value' => $loadid]);
+echo html_writer::empty_tag('input', [
+    'type'     => 'submit',
+    'name'     => 'deletebutton',
+    'value'    => get_string('btn_delete', 'report_querybuilder'),
+    'class'    => 'btn btn-outline-danger',
+    'id'       => 'deletequerybtn',
+    'disabled' => $loadid ? null : 'disabled',
+    'onclick'  => "return confirm('" . get_string('confirm_delete', 'report_querybuilder') . "');",
+]);
+echo html_writer::end_tag('form');
+
+echo html_writer::end_div();
 
 
-	echo html_writer::empty_tag('input', [
-   	     'type'  => 'submit',
-    	     'name'  => 'newbutton',
-	     'value' => get_string('btn_new', 'report_querybuilder'),
-             'class' => 'btn btn-secondary me-1',
-	]);
-
-	echo html_writer::empty_tag('input', [
-            'type'  => 'submit',
-            'name'  => 'editbutton',
-	    'value' => get_string('btn_edit',      'report_querybuilder'),
-            'class' => 'btn btn-secondary me-1',
-        ]);
-
-        echo html_writer::empty_tag('input', [
-            'type'    => 'submit',
-            'name'    => 'deletebutton',
-	    'value' => get_string('btn_delete',    'report_querybuilder'),
-            'class'   => 'btn btn-secondary',
-            'onclick' => "var sel=document.getElementsByName('loadquery')[0];
-                          var name=sel.options[sel.selectedIndex].text;
-                          if (!sel.value) { alert('Please select a query to delete.'); return false; }
-                          return confirm('Are you sure you want to delete \"' + name + '\"?');",
-        ]);
-
-        echo html_writer::end_tag('form');
-
+// ── End toolbar ───────────────────────────────────────────────
 
         // Add this JS after the form:
-        echo html_writer::script("
-            document.addEventListener('DOMContentLoaded', function() {
-                var select = document.getElementById('loadqueryselect');
-                var textarea = document.getElementById('advsql');
-                var queries = " . json_encode($filtered_by_id) . ";
-                if (select && textarea) {
-                    select.addEventListener('change', function() {
-                        var id = select.value;
-                        if (id && queries[id]) {
-                            textarea.value = queries[id].querytext;
-                        }
-                    });
-                }
-            });
-        ");
+
+$queriesjs = json_encode($filtered_by_id);
+echo <<<QUERYJS
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var select    = document.getElementById('loadqueryselect');
+    var textarea  = document.getElementById('advsql');
+    var editbtn   = document.getElementById('editquerybtn');
+    var deletebtn = document.getElementById('deletequerybtn');
+    var editid    = document.getElementById('editloadquery');
+    var deleteid  = document.getElementById('deleteloadquery');
+    var queries   = $queriesjs;
+
+    if (select && textarea) {
+        select.addEventListener('change', function() {
+            var id = select.value;
+            if (id && queries[id]) {
+                textarea.value = queries[id].querytext;
+            }
+            if (editbtn)   { editbtn.disabled   = !id; }
+            if (deletebtn) { deletebtn.disabled = !id; }
+            if (editid)    { editid.value   = id; }
+            if (deleteid)  { deleteid.value = id; }
+        });
+    }
+});
+</script>
+QUERYJS;
 
     // --- Decide what SQL to show in the textarea ---
     if ($prefill) {
@@ -272,57 +310,49 @@ foreach ($filtered as $s) {
         $sqlcontent = 'SELECT ...';
     }
 
-    // --- Show Save Query Form only if editing ---
+// --- Show Save Query Form only if editing ---
     if ($prefill || $shownewform) {
+        echo $OUTPUT->box_start('generalbox mb-3');
+        echo $OUTPUT->heading(
+            $prefill
+                ? get_string('btn_edit', 'report_querybuilder') . ': ' . s($prefill->name)
+                : get_string('btn_new',  'report_querybuilder'),
+            5
+        );
         echo html_writer::start_tag('form', [
             'method' => 'post',
-            'class'  => 'd-flex align-items-center gap-2 mb-3',
-            'style'  => 'flex-wrap:wrap;',
-            'id'     => 'savequeryform'
+            'class'  => 'd-flex align-items-center gap-2 flex-wrap',
+            'id'     => 'savequeryform',
         ]);
-
-	echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',      'value' => sesskey()]);
+	echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced', 'value' => 1]);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'savedqueryid', 'value' => !empty($prefill->id) ? $prefill->id : '']);
+        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'query',        'id' => 'hiddenquery', 'value' => htmlspecialchars($sqlcontent)]);
+        echo html_writer::empty_tag('input', [
+            'type'        => 'text', 'name' => 'category',
+            'placeholder' => get_string('category', 'report_querybuilder'),
+            'class'       => 'form-control',
+            'style'       => 'width:150px;',
+            'value'       => !empty($prefill->category) ? $prefill->category : '',
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type'        => 'text', 'name' => 'savename',
+            'placeholder' => get_string('query_name_placeholder', 'report_querybuilder'),
+            'class'       => 'form-control',
+            'style'       => 'width:220px;',
+            'value'       => !empty($prefill->name) ? $prefill->name : '',
+        ]);
 
 	echo html_writer::empty_tag('input', [
-        'type' => 'text',
-        'name' => 'category',
-        'placeholder' => get_string('category', 'report_querybuilder'),
-        'class' => 'form-control me-2',
-        'style' => 'width:auto; min-width:120px;',
-        'value' => !empty($prefill->category) ? $prefill->category : '',
-        ]);
-
-        echo html_writer::empty_tag('input', [
-            'type'  => 'text',
-            'name'  => 'savename',
-            'placeholder' => 'Query name',
-            'value' => !empty($prefill->name) ? $prefill->name : '',
-            'class' => 'form-control me-2',
-            'style' => 'width:auto; min-width:200px;',
-        ]);
-
-        echo html_writer::empty_tag('input', [
-            'type'  => 'hidden',
-            'name'  => 'savedqueryid',
-            'value' => !empty($prefill->id) ? $prefill->id : '',
-        ]);
-
-        echo html_writer::empty_tag('input', [
-            'type'  => 'hidden',
-            'name'  => 'query',
-            'id'    => 'hiddenquery',
-            'value' => htmlspecialchars($sqlcontent),
-        ]);
-
-        echo html_writer::empty_tag('input', [
-            'type'  => 'submit',
-            'name'  => 'savequery',
-	    'value' => get_string('btn_save_query','report_querybuilder'),
-            'class' => 'btn btn-secondary',
-        ]);
-
+    'type'  => 'submit',
+    'name'  => 'savequery',
+    'value' => get_string('btn_save_query', 'report_querybuilder'),
+    'class' => 'btn btn-primary',
+]);
         echo html_writer::end_tag('form');
+        echo $OUTPUT->box_end();
     }
+
 
     // --- Toggle button ---
     $togglesql = '';
@@ -332,14 +362,15 @@ foreach ($filtered as $s) {
         $togglesql = $sqlcontent;
     }
 
-    echo html_writer::start_div('mode-switch');
-    echo html_writer::link(
-        new moodle_url('/report/querybuilder/index.php', ['sql' => $togglesql]),
-        get_string('btn_switch_builder', 'report_querybuilder')
-    );
-    echo html_writer::end_div();
+echo html_writer::start_div('mb-2');
+echo html_writer::link(
+    new moodle_url('/report/querybuilder/index.php', ['sql' => $togglesql]),
+    get_string('btn_switch_builder', 'report_querybuilder'),
+    ['class' => 'btn btn-outline-secondary btn-sm', 'id' => 'modeswitchbtn']
+);
+echo html_writer::end_div();
+echo $OUTPUT->heading(get_string('advanced_editor_heading', 'report_querybuilder'), 3);
 
-    echo html_writer::tag('h3', get_string('advanced_editor_heading', 'report_querybuilder'));
 
 
 echo $OUTPUT->box_start('generalbox');
@@ -353,30 +384,31 @@ echo html_writer::start_tag('form', [
 ]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 echo html_writer::tag('textarea', htmlspecialchars($sqlcontent), [
-
-    'id'    => 'advsql',
-    'name'  => 'advsql',
-    'class' => 'language-sql form-control',
-    'style' => 'width:100%; height:300px;',
+    'id'           => 'advsql',
+    'name'         => 'advsql',
+    'class'        => 'form-control font-monospace',
+    'style'        => 'height:320px; resize:vertical;',
+    'autocomplete' => 'off',
+    'spellcheck'   => 'false',
 ]);
 
 // Button row
-echo html_writer::start_div('mt-2 d-flex gap-2 align-items-center');
-echo html_writer::tag('button', get_string('btn_run_sql', 'report_querybuilder'), [
-    'type'  => 'submit',
-    'class' => 'btn btn-secondary me-1',
-]);
-echo html_writer::tag('button', get_string('analyze_query', 'report_querybuilder'), [
-    'type'    => 'button',
-    'class'   => 'btn btn-secondary',
-    'id'      => 'analyzebtn',
-]);
+echo html_writer::start_div('mt-3 d-flex gap-2 align-items-center');
+echo html_writer::tag('button',
+    get_string('btn_run_sql', 'report_querybuilder'),
+    ['type' => 'submit', 'class' => 'btn btn-primary']
+);
+echo html_writer::tag('button',
+    get_string('analyze_query', 'report_querybuilder'),
+    ['type' => 'button', 'class' => 'btn btn-outline-secondary', 'id' => 'analyzebtn']
+);
 echo html_writer::tag('span', '', [
     'id'    => 'analyzespinner',
     'style' => 'display:none;',
-    'class' => 'spinner-border spinner-border-sm text-info ms-2',
+    'class' => 'spinner-border spinner-border-sm ms-1',
 ]);
 echo html_writer::end_div();
+
 
 echo html_writer::end_tag('form');
 
@@ -415,7 +447,7 @@ $PAGE->requires->js_call_amd('report_querybuilder/analyze', 'init');
     // --- JS to keep save form's hidden query field in sync with textarea ---
 $PAGE->requires->js_init_code("
     document.addEventListener('DOMContentLoaded', function() {
-        var toggle = document.querySelector('.mode-switch a');
+        var toggle = document.getElementById('modeswitchbtn');
         var textarea = document.getElementById('advsql');
         var hiddenquery = document.getElementById('hiddenquery');
         var saveform = document.getElementById('savequeryform');
@@ -512,12 +544,14 @@ if (!$advanced) {
 
     // Toggle button
     $generatedsql = $sql ?? '';
-    echo html_writer::start_div('mode-switch');
-    echo html_writer::link(
-        new moodle_url('/report/querybuilder/index.php', ['advanced' => 1, 'sql' => $generatedsql]),
-        get_string('btn_switch_advanced', 'report_querybuilder')
-    );
-    echo html_writer::end_div();
+echo html_writer::start_div('mb-2');
+echo html_writer::link(
+    new moodle_url('/report/querybuilder/index.php', ['advanced' => 1, 'sql' => $generatedsql]),
+    get_string('btn_switch_advanced', 'report_querybuilder'),
+    ['class' => 'btn btn-outline-secondary btn-sm']
+);
+echo html_writer::end_div();
+
 
     // Show SQL preview only if form was submitted
     if ($formdata && !empty($sql)) {
