@@ -201,9 +201,11 @@ $categoryselectobj = new single_select(
     null
 );
 $categoryselectobj->set_label(get_string('category', 'report_querybuilder'));
+echo html_writer::start_div('d-flex align-items-center gap-3 mb-2 flex-wrap');
 echo $OUTPUT->render($categoryselectobj);
 
-// Saved query selector — plain select, JS populates textarea on change
+// Saved query selector
+echo html_writer::start_div('d-flex align-items-center gap-2');
 echo html_writer::tag('label',
     get_string('select_saved_query', 'report_querybuilder'),
     ['class' => 'me-1']
@@ -215,6 +217,8 @@ echo html_writer::select(
     null,
     ['id' => 'loadqueryselect', 'class' => 'form-select d-inline-block w-auto me-2']
 );
+echo html_writer::end_div(); // saved query row
+echo html_writer::end_div(); // toolbar top row
 
 echo html_writer::start_div('d-flex gap-2 mb-3');
 
@@ -362,14 +366,14 @@ QUERYJS;
         $togglesql = $sqlcontent;
     }
 
-echo html_writer::start_div('mb-2');
+echo html_writer::start_div('d-flex justify-content-between align-items-center mb-2');
+echo $OUTPUT->heading(get_string('advanced_editor_heading', 'report_querybuilder'), 3, 'mb-0');
 echo html_writer::link(
     new moodle_url('/report/querybuilder/index.php', ['sql' => $togglesql]),
     get_string('btn_switch_builder', 'report_querybuilder'),
     ['class' => 'btn btn-outline-secondary btn-sm', 'id' => 'modeswitchbtn']
 );
 echo html_writer::end_div();
-echo $OUTPUT->heading(get_string('advanced_editor_heading', 'report_querybuilder'), 3);
 
 
 
@@ -383,6 +387,10 @@ echo html_writer::start_tag('form', [
     'action' => (new moodle_url('/report/querybuilder/index.php'))->out(false),
 ]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::tag('label',
+    get_string('advanced_editor_heading', 'report_querybuilder'),
+    ['for' => 'advsql', 'class' => 'form-label fw-semibold mb-1']
+);
 echo html_writer::tag('textarea', htmlspecialchars($sqlcontent), [
     'id'           => 'advsql',
     'name'         => 'advsql',
@@ -408,7 +416,10 @@ echo html_writer::tag('span', '', [
     'class' => 'spinner-border spinner-border-sm ms-1',
 ]);
 echo html_writer::end_div();
-
+echo html_writer::tag('small',
+    get_string('sql_editor_help', 'report_querybuilder'),
+    ['class' => 'text-muted mt-1 d-block']
+);
 
 echo html_writer::end_tag('form');
 

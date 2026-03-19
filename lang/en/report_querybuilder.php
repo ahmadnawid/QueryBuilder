@@ -66,3 +66,4 @@ $string['explain_analyzing']   = 'Analyzing...';
 $string['explain_error']       = 'Could not analyze query: ';
 $string['enter_sql'] = 'Please enter a SQL query to analyze.';
 $string['all_categories'] = 'All categories';
+$string['sql_editor_help'] = 'Write a SELECT query. Use {tablename} Moodle table prefix notation, e.g. {user}, {course}.';
