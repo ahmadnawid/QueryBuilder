@@ -24,8 +24,8 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
             btn.addEventListener('click', function() {
                 var sql = document.getElementById('advsql').value.trim();
 
-                if (!sql || sql === 'SELECT ...') {
-                    Notification.alert('', M.util.get_string('enter_sql', 'report_querybuilder'));
+                if (!sql) {
+			alert('Please enter a SQL query to analyze.');
                     return;
                 }
 

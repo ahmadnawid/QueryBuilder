@@ -79,7 +79,6 @@ if ($columns) {
 }
 
 if ($advanced) {
-    echo $OUTPUT->header();
 
     $saved = query_manager::get_all();
     $loadid  = optional_param('loadquery', 0, PARAM_INT);
@@ -126,9 +125,7 @@ if ($advanced) {
             query_manager::update($savedqueryid, $savename, $query, $category);
             redirect(
                 new moodle_url('/report/querybuilder/index.php', [
-                    'advanced' => 1,
-                    'categoryfilter' => $category // keep user in the same category
-                ]),
+                    'advanced' => 1]),
                 get_string('query_updated', 'report_querybuilder'),
                 null,
 		\core\output\notification::NOTIFY_SUCCESS
@@ -137,9 +134,7 @@ if ($advanced) {
             query_manager::insert($savename, $query, $category);
             redirect(
                 new moodle_url('/report/querybuilder/index.php', [
-                    'advanced' => 1,
-                    'categoryfilter' => $category // keep user in the same category
-                ]),
+                    'advanced' => 1]),
                 get_string('query_saved', 'report_querybuilder'),
                 null,
 		\core\output\notification::NOTIFY_SUCCESS
@@ -152,7 +147,7 @@ if ($advanced) {
 
 }
 
-
+echo $OUTPUT->header();
 
 
 $categories = [];
@@ -311,7 +306,7 @@ QUERYJS;
     } elseif (!empty($sqlparam)) {
         $sqlcontent = $sqlparam;
     } else {
-        $sqlcontent = 'SELECT ...';
+        $sqlcontent = '';
     }
 
 // --- Show Save Query Form only if editing ---
@@ -353,6 +348,11 @@ QUERYJS;
     'value' => get_string('btn_save_query', 'report_querybuilder'),
     'class' => 'btn btn-primary',
 ]);
+echo html_writer::link(
+            new moodle_url('/report/querybuilder/index.php', ['advanced' => 1]),
+            get_string('cancel', 'core'),
+            ['class' => 'btn btn-outline-secondary ms-1']
+        );
         echo html_writer::end_tag('form');
         echo $OUTPUT->box_end();
     }
@@ -362,7 +362,7 @@ QUERYJS;
     $togglesql = '';
     if (!empty($advsql)) {
         $togglesql = $advsql;
-    } elseif (!empty($sqlcontent) && $sqlcontent !== 'SELECT ...') {
+    } elseif (!empty($sqlcontent)) {
         $togglesql = $sqlcontent;
     }
 
@@ -371,7 +371,11 @@ echo $OUTPUT->heading(get_string('advanced_editor_heading', 'report_querybuilder
 echo html_writer::link(
     new moodle_url('/report/querybuilder/index.php', ['sql' => $togglesql]),
     get_string('btn_switch_builder', 'report_querybuilder'),
-    ['class' => 'btn btn-outline-secondary btn-sm', 'id' => 'modeswitchbtn']
+    [
+		'class' => 'btn btn-outline-secondary btn-sm', 
+		'id' => 'modeswitchbtn',
+		'title' => get_string('switch_builder_tooltip', 'report_querybuilder')
+    ]
 );
 echo html_writer::end_div();
 
@@ -404,7 +408,15 @@ echo html_writer::tag('textarea', htmlspecialchars($sqlcontent), [
 echo html_writer::start_div('mt-3 d-flex gap-2 align-items-center');
 echo html_writer::tag('button',
     get_string('btn_run_sql', 'report_querybuilder'),
-    ['type' => 'submit', 'class' => 'btn btn-primary']
+    [
+        'type'    => 'submit',
+        'class'   => 'btn btn-primary',
+        'onclick' => "var sql = document.getElementById('advsql').value.trim();
+                      if (!sql) {
+                          alert('" . get_string('enter_sql', 'report_querybuilder') . "');
+                          return false;
+                      }",
+    ]
 );
 echo html_writer::tag('button',
     get_string('analyze_query', 'report_querybuilder'),
@@ -451,33 +463,73 @@ echo $OUTPUT->box_end();
 
 
 
-// Replace the entire heredoc block with just this:
 $PAGE->requires->js_call_amd('report_querybuilder/analyze', 'init');
 
 
-    // --- JS to keep save form's hidden query field in sync with textarea ---
 $PAGE->requires->js_init_code("
     document.addEventListener('DOMContentLoaded', function() {
         var toggle = document.getElementById('modeswitchbtn');
         var textarea = document.getElementById('advsql');
         var hiddenquery = document.getElementById('hiddenquery');
         var saveform = document.getElementById('savequeryform');
+
+        // 1. Disable switch button if textarea is empty
+        function toggleSwitchBtn() {
+            if (!toggle || !textarea) return;
+            if (textarea.value.trim() === '') {
+                toggle.classList.add('disabled');
+                toggle.setAttribute('aria-disabled', 'true');
+                toggle.onclick = function(e) { e.preventDefault(); };
+            } else {
+                toggle.classList.remove('disabled');
+                toggle.removeAttribute('aria-disabled');
+                toggle.onclick = null;
+            }
+        }
+        if (textarea && toggle) {
+            textarea.addEventListener('input', toggleSwitchBtn);
+            toggleSwitchBtn();
+        }
+
+        // 2. Intercept click and check SQL via AJAX before switching
         if (toggle && textarea) {
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 var sql = textarea.value;
-                var url = new URL(toggle.href, window.location.origin);
-                url.searchParams.set('sql', sql);
-                window.location.href = url.toString();
+                if (!sql.trim()) return;
+                toggle.classList.add('disabled');
+                fetch(M.cfg.wwwroot + '/report/querybuilder/ajax/parse_sql.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'sql=' + encodeURIComponent(sql)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    toggle.classList.remove('disabled');
+                    if (data.status === 'ok') {
+                        var url = new URL(toggle.href, window.location.origin);
+                        url.searchParams.set('sql', sql);
+                        window.location.href = url.toString();
+                    } else {
+                        alert(data.message || 'SQL cannot be converted to builder mode.');
+                    }
+                })
+                .catch(() => {
+                    toggle.classList.remove('disabled');
+                    alert('Error contacting server.');
+                });
             });
         }
+
+        // 3. Keep save form's hidden query field in sync with textarea
         if (saveform && textarea && hiddenquery) {
             saveform.addEventListener('submit', function() {
                 hiddenquery.value = textarea.value;
             });
         }
     });
-    ");
+");
+
 
     echo $OUTPUT->footer();
     exit;

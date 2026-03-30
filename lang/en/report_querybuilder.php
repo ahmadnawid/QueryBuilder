@@ -67,3 +67,5 @@ $string['explain_error']       = 'Could not analyze query: ';
 $string['enter_sql'] = 'Please enter a SQL query to analyze.';
 $string['all_categories'] = 'All categories';
 $string['sql_editor_help'] = 'Write a SELECT query. Use {tablename} Moodle table prefix notation, e.g. {user}, {course}.';
+$string['sql_too_complex'] = 'This SQL cannot be converted to the builder. Please simplify it or reset.';
+$string['switch_builder_tooltip'] = 'Switch to visual builder (only for simple SELECT queries)';
