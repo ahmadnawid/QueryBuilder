@@ -465,63 +465,23 @@ echo $OUTPUT->box_end();
 
 $PAGE->requires->js_call_amd('report_querybuilder/analyze', 'init');
 
-
 $PAGE->requires->js_init_code("
     document.addEventListener('DOMContentLoaded', function() {
-        var toggle = document.getElementById('modeswitchbtn');
-        var textarea = document.getElementById('advsql');
+        var toggle     = document.getElementById('modeswitchbtn');
+        var textarea   = document.getElementById('advsql');
         var hiddenquery = document.getElementById('hiddenquery');
-        var saveform = document.getElementById('savequeryform');
+        var saveform   = document.getElementById('savequeryform');
 
-        // 1. Disable switch button if textarea is empty
-        function toggleSwitchBtn() {
-            if (!toggle || !textarea) return;
-            if (textarea.value.trim() === '') {
-                toggle.classList.add('disabled');
-                toggle.setAttribute('aria-disabled', 'true');
-                toggle.onclick = function(e) { e.preventDefault(); };
-            } else {
-                toggle.classList.remove('disabled');
-                toggle.removeAttribute('aria-disabled');
-                toggle.onclick = null;
-            }
-        }
-        if (textarea && toggle) {
-            textarea.addEventListener('input', toggleSwitchBtn);
-            toggleSwitchBtn();
-        }
-
-        // 2. Intercept click and check SQL via AJAX before switching
         if (toggle && textarea) {
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
-                var sql = textarea.value;
-                if (!sql.trim()) return;
-                toggle.classList.add('disabled');
-                fetch(M.cfg.wwwroot + '/report/querybuilder/ajax/parse_sql.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'sql=' + encodeURIComponent(sql)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    toggle.classList.remove('disabled');
-                    if (data.status === 'ok') {
-                        var url = new URL(toggle.href, window.location.origin);
-                        url.searchParams.set('sql', sql);
-                        window.location.href = url.toString();
-                    } else {
-                        alert(data.message || 'SQL cannot be converted to builder mode.');
-                    }
-                })
-                .catch(() => {
-                    toggle.classList.remove('disabled');
-                    alert('Error contacting server.');
-                });
+                if (!textarea.value.trim()) return;
+                var url = new URL(toggle.href, window.location.origin);
+                url.searchParams.set('sql', textarea.value);
+                window.location.href = url.toString();
             });
         }
 
-        // 3. Keep save form's hidden query field in sync with textarea
         if (saveform && textarea && hiddenquery) {
             saveform.addEventListener('submit', function() {
                 hiddenquery.value = textarea.value;
