@@ -1,14 +1,52 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * SQL compiler for the visual query builder.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace report_querybuilder\query;
 
 defined('MOODLE_INTERNAL') || die();
 
 use report_querybuilder\domain\entities;
 
+/**
+ * Class for compiling AST to SQL for the visual query builder.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class compiler {
 
     /**
      * Build a simple AST from form data.
+     *
+     * @param string $base The base entity key.
+     * @param array $fields The selected fields.
+     * @param array $joins The selected joins.
+     * @param string $filterfield The filter field.
+     * @param string $filterop The filter operator.
+     * @param string $filtervalue The filter value.
+     * @return array The AST array.
      */
     public static function build_ast($base, $fields, $joins, $filterfield, $filterop, $filtervalue): array {
         if (!is_array($fields)) {
@@ -32,6 +70,9 @@ class compiler {
 
     /**
      * Compile AST to SQL (no execution, just preview).
+     *
+     * @param array $ast The AST array.
+     * @return string The compiled SQL string.
      */
     public static function compile(array $ast): string {
         $entities = entities::list();

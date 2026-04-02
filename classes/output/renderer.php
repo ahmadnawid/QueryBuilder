@@ -1,4 +1,27 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Output renderer for Query Builder results.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace report_querybuilder\output;
 
 global $CFG;
@@ -10,13 +33,33 @@ use html_table;
 use moodle_url;
 use html_writer;
 
+/**
+ * Renderer for outputting Query Builder results and UI elements.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class renderer extends \plugin_renderer_base {
 
+    /**
+     * Removes ORDER BY clause from a SQL string.
+     *
+     * @param string $sql The SQL string.
+     * @return string SQL string without ORDER BY.
+     */
     private function strip_order_by($sql) {
     return preg_replace('/ORDER\s+BY[\s\S]*$/i', '', $sql);
     }
 
-
+    /**
+     * Renders the results table using Moodle's flexible_table.
+     *
+     * @param array $columns The column names.
+     * @param string $sql The SQL query.
+     * @param string $download Download type (csv, xls, etc.), or empty for normal display.
+     * @return string Empty string (output is sent directly).
+     */
     public function render_results_table($columns, $sql, $download = '') {
     global $DB, $PAGE;
 
@@ -39,8 +82,8 @@ class renderer extends \plugin_renderer_base {
      // IMPORTANT: base URL
     $table->define_baseurl(
         new \moodle_url('/report/querybuilder/index.php', [
-            'advanced' => 1,
-            'advsql' => $sql
+            'advsql' => $sql,
+	    'sesskey' => sesskey(),
         ])
     );
 
@@ -89,7 +132,11 @@ class renderer extends \plugin_renderer_base {
     return '';
 
 }
-
+    /**
+     * Returns the JS snippet to initialize DataTables.
+     *
+     * @return string HTML/JS snippet.
+     */
     public function datatables_init_script() {
         return '<script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -106,7 +153,12 @@ class renderer extends \plugin_renderer_base {
         </script>';
     }
 
-
+/**
+     * Returns export buttons for CSV and PDF.
+     *
+     * @param string $sql The SQL query.
+     * @return string HTML for export buttons.
+     */
 public function export_buttons($sql) {
     $output = html_writer::link(
         new \moodle_url('/report/querybuilder/export.php', [
@@ -127,6 +179,11 @@ public function export_buttons($sql) {
     return $output;
 }
 
+ /**
+     * Returns a back button to return to the main page.
+     *
+     * @return string HTML for the back button.
+     */
 public function back_button() {
     return html_writer::tag(
         'p',
@@ -138,5 +195,4 @@ public function back_button() {
         ['style' => 'margin-top:20px;']
     );
 }
-
 }
