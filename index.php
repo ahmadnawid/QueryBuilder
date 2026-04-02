@@ -353,15 +353,13 @@ QUERYJS;
         echo html_writer::empty_tag('input', [
             'type'        => 'text', 'name' => 'category',
             'placeholder' => get_string('category', 'report_querybuilder'),
-            'class'       => 'form-control',
-            'style'       => 'width:150px;',
+            'class'       => 'form-control qb-input-category',
             'value'       => !empty($prefill->category) ? $prefill->category : '',
         ]);
         echo html_writer::empty_tag('input', [
             'type'        => 'text', 'name' => 'savename',
             'placeholder' => get_string('query_name_placeholder', 'report_querybuilder'),
-            'class'       => 'form-control',
-            'style'       => 'width:220px;',
+            'class'       => 'form-control qb-input-savename',
             'value'       => !empty($prefill->name) ? $prefill->name : '',
         ]);
 
@@ -421,8 +419,8 @@ echo html_writer::tag('label',
 echo html_writer::tag('textarea', htmlspecialchars($sqlcontent), [
     'id'           => 'advsql',
     'name'         => 'advsql',
-    'class'        => 'form-control font-monospace',
-    'style'        => 'height:320px; resize:vertical;',
+    'class' => 'form-control font-monospace',
+    'style' => 'height:320px; resize:vertical;',
     'autocomplete' => 'off',
     'spellcheck'   => 'false',
 ]);
@@ -447,8 +445,8 @@ echo html_writer::tag('button',
 );
 echo html_writer::tag('span', '', [
     'id'    => 'analyzespinner',
-    'style' => 'display:none;',
     'class' => 'spinner-border spinner-border-sm ms-1',
+    'style' => 'display:none;',
 ]);
 echo html_writer::end_div();
 echo html_writer::tag('small',

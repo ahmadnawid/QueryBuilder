@@ -1,3 +1,24 @@
 #page-report-querybuilder-index nav.pagination:first-of-type {
     display: none;
 }
+
+.qb-input-category {
+    width: 150px;
+}
+
+.qb-input-savename {
+    width: 220px;
+}
+
+.qb-textarea-editor {
+    height: 320px;
+    resize: vertical;
+}
+
+.qb-spinner {
+    display: none;
+}
+
+.qb-explain-panel {
+    display: none;
+}
