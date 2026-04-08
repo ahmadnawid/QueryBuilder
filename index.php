@@ -45,7 +45,7 @@ $PAGE->set_url('/report/querybuilder/index.php');
 $PAGE->set_title(get_string('pagetitle', 'report_querybuilder'));
 $PAGE->set_heading(get_string('pageheading', 'report_querybuilder'));
 
-$PAGE->requires->jquery(); // Moodle's built-in jQuery
+$PAGE->requires->jquery(); // Moodle's built-in jQuery.
 
 $sqlparam = optional_param('sql', '', PARAM_RAW);
 $advsql = optional_param('advsql', '', PARAM_RAW);
@@ -109,12 +109,12 @@ if ($advanced) {
         $sqlcontent = '';
     }
 
-    // Only set $prefill when Edit is clicked
+    // Only set $prefill when Edit is clicked.
     if (optional_param('editbutton', null, PARAM_RAW) && $loadid) {
         $prefill = query_manager::get($loadid);
     }
 
-    // DELETE
+    // Delete.
     if (optional_param('deletebutton', null, PARAM_RAW)) {
         require_sesskey();
         $deleteid = $loadid ?: optional_param('savedqueryid', 0, PARAM_INT);
@@ -129,7 +129,7 @@ if ($advanced) {
         }
     }
 
-    // SAVE
+    // Save.
     if (optional_param('savequery', null, PARAM_RAW)) {
         require_sesskey();
         $savename = required_param('savename', PARAM_TEXT);
@@ -142,7 +142,8 @@ if ($advanced) {
                 query_manager::update($savedqueryid, $savename, $query, $category);
                 redirect(
                     new moodle_url('/report/querybuilder/index.php', [
-                        'advanced' => 1]),
+                        'advanced' => 1,
+                    ]),
                     get_string('query_updated', 'report_querybuilder'),
                     null,
                     \core\output\notification::NOTIFY_SUCCESS
@@ -151,7 +152,8 @@ if ($advanced) {
                 query_manager::insert($savename, $query, $category);
                 redirect(
                     new moodle_url('/report/querybuilder/index.php', [
-                        'advanced' => 1]),
+                        'advanced' => 1,
+                    ]),
                     get_string('query_saved', 'report_querybuilder'),
                     null,
                     \core\output\notification::NOTIFY_SUCCESS
@@ -175,7 +177,7 @@ if ($advanced) {
 
     $selectedcategory = optional_param('categoryfilter', '', PARAM_TEXT);
 
-    // Filter saved queries by category
+    // Filter saved queries by category.
     $filtered = [];
     if ($saved) {
         foreach ($saved as $s) {
@@ -185,19 +187,19 @@ if ($advanced) {
         }
     }
 
-    // Build options for saved query dropdown
+    // Build options for saved query dropdown.
     $options = ['' => get_string('select_saved_query', 'report_querybuilder')];
     foreach ($filtered as $s) {
         $options[$s->id] = $s->name . (!empty($s->category) ? ' (' . $s->category . ')' : '');
     }
 
-    // Build JS object keyed by ID
-    $filtered_by_id = [];
+    // Build JS object keyed by ID.
+    $filteredbyid = [];
     foreach ($filtered as $s) {
-        $filtered_by_id[$s->id] = $s;
+        $filteredbyid[$s->id] = $s;
     }
 
-    // ── Toolbar ───────────────────────────────────────────────────
+    // Toolbar.
     $categoryurl = new moodle_url('/report/querybuilder/index.php', [
         'advanced'  => 1,
         'loadquery' => $loadid,
@@ -213,7 +215,7 @@ if ($advanced) {
     echo html_writer::start_div('d-flex align-items-center gap-3 mb-2 flex-wrap');
     echo $OUTPUT->render($categoryselectobj);
 
-    // Saved query selector
+    // Saved query selector.
     echo html_writer::start_div('d-flex align-items-center gap-2');
     echo html_writer::tag('label',
         get_string('select_saved_query', 'report_querybuilder'),
@@ -226,8 +228,8 @@ if ($advanced) {
         null,
         ['id' => 'loadqueryselect', 'class' => 'form-select d-inline-block w-auto me-2']
     );
-    echo html_writer::end_div(); // saved query row
-    echo html_writer::end_div(); // toolbar top row
+    echo html_writer::end_div(); // Saved query row.
+    echo html_writer::end_div(); // Toolbar top row.
 
     echo html_writer::start_div('d-flex gap-2 mb-3');
 
@@ -238,15 +240,28 @@ if ($advanced) {
     ]);
     echo $OUTPUT->single_button($newurl, get_string('btn_new', 'report_querybuilder'), 'get');
 
-    // Edit form — action URL updated by JS when query selected
+    // Edit form. Action URL updated by JS when query selected.
     echo html_writer::start_tag('form', [
         'method' => 'post',
         'id'     => 'editqueryform',
         'action' => (new moodle_url('/report/querybuilder/index.php'))->out(false),
     ]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',     'value' => sesskey()]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced',    'value' => 1]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'loadquery',   'id'    => 'editloadquery', 'value' => $loadid]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'sesskey',
+        'value' => sesskey(),
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'advanced',
+        'value' => 1,
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'loadquery',
+        'id'   => 'editloadquery',
+        'value' => $loadid,
+    ]);
     echo html_writer::empty_tag('input', [
         'type'     => 'submit',
         'name'     => 'editbutton',
@@ -257,15 +272,28 @@ if ($advanced) {
     ]);
     echo html_writer::end_tag('form');
 
-    // Delete form
+    // Delete form.
     echo html_writer::start_tag('form', [
         'method' => 'post',
         'id'     => 'deletequeryform',
         'action' => (new moodle_url('/report/querybuilder/index.php'))->out(false),
     ]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',     'value' => sesskey()]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced',    'value' => 1]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'loadquery',   'id'    => 'deleteloadquery', 'value' => $loadid]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'sesskey',
+        'value' => sesskey(),
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'advanced',
+        'value' => 1,
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'loadquery',
+        'id'   => 'deleteloadquery',
+        'value' => $loadid,
+    ]);
     echo html_writer::empty_tag('input', [
         'type'     => 'submit',
         'name'     => 'deletebutton',
@@ -279,10 +307,10 @@ if ($advanced) {
 
     echo html_writer::end_div();
 
-    // ── End toolbar ───────────────────────────────────────────────
+    // End toolbar.
 
-    // Add this JS after the form:
-    $queriesjs = json_encode($filtered_by_id);
+    // Add this JS after the form.
+    $queriesjs = json_encode($filteredbyid);
     echo <<<QUERYJS
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -310,18 +338,18 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 QUERYJS;
 
-    // --- Decide what SQL to show in the textarea ---
+    // Decide what SQL to show in the textarea.
     if ($prefill) {
         $sqlcontent = $prefill->querytext;
-    } elseif (!empty($advsql)) {
+    } else if (!empty($advsql)) {
         $sqlcontent = $advsql;
-    } elseif (!empty($sqlparam)) {
+    } else if (!empty($sqlparam)) {
         $sqlcontent = $sqlparam;
     } else {
         $sqlcontent = '';
     }
 
-    // --- Show Save Query Form only if editing ---
+    // Show Save Query Form only if editing.
     if ($prefill || $shownewform) {
         echo $OUTPUT->box_start('generalbox mb-3');
         echo $OUTPUT->heading(
@@ -335,23 +363,41 @@ QUERYJS;
             'class'  => 'd-flex align-items-center gap-2 flex-wrap',
             'id'     => 'savequeryform',
         ]);
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',      'value' => sesskey()]);
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'advanced', 'value' => 1]);
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'savedqueryid', 'value' => !empty($prefill->id) ? $prefill->id : '']);
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'query',        'id' => 'hiddenquery', 'value' => htmlspecialchars($sqlcontent)]);
         echo html_writer::empty_tag('input', [
-            'type'        => 'text', 'name' => 'category',
+            'type' => 'hidden',
+            'name' => 'sesskey',
+            'value' => sesskey(),
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'advanced',
+            'value' => 1,
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'savedqueryid',
+            'value' => !empty($prefill->id) ? $prefill->id : '',
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'hidden',
+            'name' => 'query',
+            'id'   => 'hiddenquery',
+            'value' => htmlspecialchars($sqlcontent),
+        ]);
+        echo html_writer::empty_tag('input', [
+            'type'        => 'text',
+            'name'        => 'category',
             'placeholder' => get_string('category', 'report_querybuilder'),
             'class'       => 'form-control qb-input-category',
             'value'       => !empty($prefill->category) ? $prefill->category : '',
         ]);
         echo html_writer::empty_tag('input', [
-            'type'        => 'text', 'name' => 'savename',
+            'type'        => 'text',
+            'name'        => 'savename',
             'placeholder' => get_string('query_name_placeholder', 'report_querybuilder'),
             'class'       => 'form-control qb-input-savename',
             'value'       => !empty($prefill->name) ? $prefill->name : '',
         ]);
-
         echo html_writer::empty_tag('input', [
             'type'  => 'submit',
             'name'  => 'savequery',
@@ -367,11 +413,11 @@ QUERYJS;
         echo $OUTPUT->box_end();
     }
 
-    // --- Toggle button ---
+    // Toggle button.
     $togglesql = '';
     if (!empty($advsql)) {
         $togglesql = $advsql;
-    } elseif (!empty($sqlcontent)) {
+    } else if (!empty($sqlcontent)) {
         $togglesql = $sqlcontent;
     }
 
@@ -383,21 +429,25 @@ QUERYJS;
         [
             'class' => 'btn btn-outline-secondary btn-sm',
             'id' => 'modeswitchbtn',
-            'title' => get_string('switch_builder_tooltip', 'report_querybuilder')
+            'title' => get_string('switch_builder_tooltip', 'report_querybuilder'),
         ]
     );
     echo html_writer::end_div();
 
     echo $OUTPUT->box_start('generalbox');
 
-    // SQL editor form
+    // SQL editor form.
     echo html_writer::start_tag('form', [
         'method' => 'post',
         'class'  => 'mb-3',
         'id'     => 'sqleditorform',
         'action' => (new moodle_url('/report/querybuilder/index.php'))->out(false),
     ]);
-    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden',
+        'name' => 'sesskey',
+        'value' => sesskey(),
+    ]);
     echo html_writer::tag('label',
         get_string('advanced_editor_heading', 'report_querybuilder'),
         ['for' => 'advsql', 'class' => 'form-label fw-semibold mb-1']
@@ -411,7 +461,7 @@ QUERYJS;
         'spellcheck'   => 'false',
     ]);
 
-    // Button row
+    // Button row.
     echo html_writer::start_div('mt-3 d-flex gap-2 align-items-center');
     echo html_writer::tag('button',
         get_string('btn_run_sql', 'report_querybuilder'),
@@ -442,11 +492,11 @@ QUERYJS;
 
     echo html_writer::end_tag('form');
 
-    // --- EXPLAIN PLAN PANEL (shown below editor after analyze) ---
+    // Explain plan panel (shown below editor after analyze).
     echo html_writer::start_div('mt-3', ['id' => 'explainpanel', 'style' => 'display:none;']);
     echo html_writer::start_div('card');
 
-    // Card header
+    // Card header.
     echo html_writer::start_div('card-header d-flex justify-content-between align-items-center');
     echo html_writer::tag('strong', get_string('explain_plan', 'report_querybuilder'));
     echo html_writer::tag('button', 'Close', [
@@ -456,15 +506,15 @@ QUERYJS;
     ]);
     echo html_writer::end_div();
 
-    // Card body: warnings then plan table
+    // Card body: warnings then plan table.
     echo html_writer::start_div('card-body');
     echo html_writer::tag('div', '', ['id' => 'explainwarnings']);
     echo html_writer::tag('div', '', ['id' => 'explaintable', 'class' => 'mt-3']);
-    echo html_writer::end_div(); // card-body
+    echo html_writer::end_div(); // Card-body.
 
-    echo html_writer::end_div(); // card
-    echo html_writer::end_div(); // explainpanel
-    // --- END EXPLAIN PANEL ---
+    echo html_writer::end_div(); // Card.
+    echo html_writer::end_div(); // Explainpanel.
+    // End explain panel.
 
     echo $OUTPUT->box_end();
 
@@ -504,31 +554,34 @@ if (!$advanced) {
 
     $base = optional_param('base', null, PARAM_TEXT);
     $joins = isset($_REQUEST['joins']) ? $_REQUEST['joins'] : [];
-    $filter_field = optional_param('filter_field', '', PARAM_TEXT);
-    $filter_op = optional_param('filter_op', '', PARAM_TEXT);
-    $filter_value = optional_param('filter_value', '', PARAM_TEXT);
+    $filterfield = optional_param('filter_field', '', PARAM_TEXT);
+    $filterop = optional_param('filter_op', '', PARAM_TEXT);
+    $filtervalue = optional_param('filter_value', '', PARAM_TEXT);
 
-    // Parse SQL param (if coming from Advanced mode)
+    // Parse SQL param (if coming from Advanced mode).
     $builderstate = null;
     if (!empty($sqlparam)) {
         $builderstate = sql_utils::parse_sql_to_builder_state($sqlparam);
     }
 
-    // Optional: Show a warning if SQL is too complex
+    // Optional: Show a warning if SQL is too complex.
     if (!empty($sqlparam) && !$builderstate) {
-        echo html_writer::div('This SQL is too complex to edit in the builder. Please simplify it or reset.', 'alert alert-warning');
+        echo html_writer::div(
+            'This SQL is too complex to edit in the builder. Please simplify it or reset.',
+            'alert alert-warning'
+        );
     }
 
     $form = new builder_form(null, [
         'base' => $builderstate['base'] ?? $base,
         'fields' => $builderstate['fields'] ?? [],
         'joins' => $builderstate['joins'] ?? $joins,
-        'filter_field' => $builderstate['filter_field'] ?? $filter_field,
-        'filter_op' => $builderstate['filter_op'] ?? $filter_op,
-        'filter_value' => $builderstate['filter_value'] ?? $filter_value
+        'filter_field' => $builderstate['filter_field'] ?? $filterfield,
+        'filter_op' => $builderstate['filter_op'] ?? $filterop,
+        'filter_value' => $builderstate['filter_value'] ?? $filtervalue,
     ]);
 
-    // Always get current form values
+    // Always get current form values.
     $formdata = $form->get_data();
     if (!$formdata) {
         $formvalues = $form->get_submitted_data();
@@ -539,14 +592,14 @@ if (!$advanced) {
                 'base' => $builderstate['base'] ?? $base,
                 'fields' => $builderstate['fields'] ?? [],
                 'joins' => $builderstate['joins'] ?? $joins,
-                'filter_field' => $builderstate['filter_field'] ?? $filter_field,
-                'filter_op' => $builderstate['filter_op'] ?? $filter_op,
-                'filter_value' => $builderstate['filter_value'] ?? $filter_value
+                'filter_field' => $builderstate['filter_field'] ?? $filterfield,
+                'filter_op' => $builderstate['filter_op'] ?? $filterop,
+                'filter_value' => $builderstate['filter_value'] ?? $filtervalue,
             ];
         }
     }
 
-    // Always generate SQL if possible
+    // Always generate SQL if possible.
     if (!empty($formdata->base) && !empty($formdata->fields)) {
         $ast = compiler::build_ast(
             $formdata->base,
@@ -561,7 +614,7 @@ if (!$advanced) {
         $sql = '';
     }
 
-    // Toggle button
+    // Toggle button.
     $generatedsql = $sql ?? '';
     echo html_writer::start_div('mb-2');
     echo html_writer::link(
@@ -571,7 +624,7 @@ if (!$advanced) {
     );
     echo html_writer::end_div();
 
-    // Show SQL preview only if form was submitted
+    // Show SQL preview only if form was submitted.
     if ($formdata && !empty($sql)) {
         echo html_writer::tag('h3', get_string('sql_preview_heading', 'report_querybuilder'));
         $highlighted = '<pre><code class="language-sql">' . htmlspecialchars($sql) . '</code></pre>';

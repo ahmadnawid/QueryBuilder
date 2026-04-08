@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * External API function for query plan analysis.
- *
- * @package    report_querybuilder
- * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace report_querybuilder\external;
 
 defined('MOODLE_INTERNAL') || die();
@@ -35,6 +27,13 @@ use external_single_structure;
 use external_multiple_structure;
 use report_querybuilder\local\sql_validator;
 
+/**
+ * External API function for query plan analysis.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class analyze_query extends \external_api {
     /**
      * Returns the parameters for the external function.
@@ -57,16 +56,16 @@ class analyze_query extends \external_api {
     public static function execute(string $sql): array {
         global $DB;
 
-        // Validate parameters
+        // Validate parameters.
         $params = self::validate_parameters(self::execute_parameters(), ['sql' => $sql]);
         $sql    = $params['sql'];
 
-        // Check capability
+        // Check capability.
         $context = \context_system::instance();
         self::validate_context($context);
         require_capability('report/querybuilder:view', $context);
 
-        // Validate SQL is safe
+        // Validate SQL is safe.
         $error = sql_validator::validate($sql);
         if ($error) {
             throw new \invalid_parameter_exception($error);
@@ -142,16 +141,16 @@ class analyze_query extends \external_api {
      * @return void
      */
     private static function flatten_plan(array $node, array &$steps, array &$warnings, int $depth): void {
-        $nodetype   = $node['Node Type']     ?? '';
+        $nodetype   = $node['Node Type'] ?? '';
         $relation   = $node['Relation Name'] ?? ($node['Alias'] ?? '');
-        $rows_est   = $node['Plan Rows']     ?? 0;
-        $width      = $node['Plan Width']    ?? 0;
-        $cost_total = $node['Total Cost']    ?? 0;
-        $index_name = $node['Index Name']    ?? null;
-        $index_cond = $node['Index Cond']    ?? null;
-        $filter     = $node['Filter']        ?? '';
-        $join_type  = $node['Join Type']     ?? null;
-        $strategy   = $node['Strategy']      ?? null;
+        $rowsest    = $node['Plan Rows'] ?? 0;
+        $width      = $node['Plan Width'] ?? 0;
+        $costtotal  = $node['Total Cost'] ?? 0;
+        $indexname  = $node['Index Name'] ?? null;
+        $indexcond  = $node['Index Cond'] ?? null;
+        $filter     = $node['Filter'] ?? '';
+        $jointype   = $node['Join Type'] ?? null;
+        $strategy   = $node['Strategy'] ?? null;
 
         $stepwarnings = [];
 
@@ -162,35 +161,35 @@ class analyze_query extends \external_api {
             ];
         }
 
-        if ((int)$rows_est > 100000) {
+        if ((int)$rowsest > 100000) {
             $stepwarnings[] = [
                 'level'   => 'warning',
-                'message' => 'Step estimates ' . number_format($rows_est) . ' rows'
+                'message' => 'Step estimates ' . number_format($rowsest) . ' rows'
                     . (!empty($relation) ? ' on "' . $relation . '"' : '') . '.',
             ];
         }
 
-        if (in_array(strtolower($nodetype), ['hash join', 'nested loop']) && (int)$rows_est > 10000) {
+        if (in_array(strtolower($nodetype), ['hash join', 'nested loop']) && (int)$rowsest > 10000) {
             $stepwarnings[] = [
                 'level'   => 'warning',
-                'message' => strtoupper($nodetype) . ' over ' . number_format($rows_est) . ' rows. Check join indexes.',
+                'message' => strtoupper($nodetype) . ' over ' . number_format($rowsest) . ' rows. Check join indexes.',
             ];
         }
 
-        $indexinfo = $index_name
-            ? $index_name . ($index_cond ? ' ON ' . $index_cond : '')
+        $indexinfo = $indexname
+            ? $indexname . ($indexcond ? ' ON ' . $indexcond : '')
             : '';
 
         $steps[] = [
             'depth'      => $depth,
             'node_type'  => $nodetype
-                . ($join_type ? ' (' . $join_type . ')' : '')
-                . ($strategy  ? ' [' . $strategy  . ']' : ''),
+                . ($jointype ? ' (' . $jointype . ')' : '')
+                . ($strategy ? ' [' . $strategy  . ']' : ''),
             'relation'   => (string)$relation,
             'index'      => (string)$indexinfo,
-            'rows_est'   => (float)$rows_est,
+            'rows_est'   => (float)$rowsest,
             'width'      => (int)$width,
-            'cost_total' => (float)$cost_total,
+            'cost_total' => (float)$costtotal,
             'filter'     => (string)$filter,
             'warnings'   => $stepwarnings,
         ];
@@ -201,6 +200,6 @@ class analyze_query extends \external_api {
             foreach ($node['Plans'] as $child) {
                 self::flatten_plan($child, $steps, $warnings, $depth + 1);
             }
+        }
     }
-}
 }

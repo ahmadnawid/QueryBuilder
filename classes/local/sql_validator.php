@@ -24,8 +24,6 @@
 
 namespace report_querybuilder\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for validating SQL queries for safe execution.
  *

@@ -24,10 +24,8 @@
 
 namespace report_querybuilder\domain;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * Built-in entity definitions for Moodle 4.5
+ * Built-in entity definitions for Moodle 4.5.
  *
  * Each entity defines:
  *   name   - human readable label shown in the builder UI
@@ -55,9 +53,7 @@ class entities {
     public static function list(): array {
         return [
 
-            // ================================================================
-            // USERS
-            // ================================================================
+            // ... USERS
             'user' => [
                 'name'   => 'User',
                 'table'  => 'user',
@@ -136,9 +132,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // COURSES
-            // ================================================================
+            // ... COURSES
             'course' => [
                 'name'   => 'Course',
                 'table'  => 'course',
@@ -206,9 +200,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // COURSE CATEGORIES
-            // ================================================================
+            // ... COURSE CATEGORIES
             'course_category' => [
                 'name'   => 'Course Category',
                 'table'  => 'course_categories',
@@ -237,9 +229,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ENROLMENTS
-            // ================================================================
+            // ... ENROLMENTS
             'enrolment' => [
                 'name'   => 'Enrolment (User)',
                 'table'  => 'user_enrolments',
@@ -276,9 +266,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ENROL METHODS
-            // ================================================================
+            // ... ENROL METHODS
             'enrol' => [
                 'name'   => 'Enrolment Method',
                 'table'  => 'enrol',
@@ -320,9 +308,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ROLES
-            // ================================================================
+            // ... ROLES
             'role' => [
                 'name'   => 'Role',
                 'table'  => 'role',
@@ -344,9 +330,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ROLE ASSIGNMENTS
-            // ================================================================
+            // ... ROLE ASSIGNMENTS
             'role_assignment' => [
                 'name'   => 'Role Assignment',
                 'table'  => 'role_assignments',
@@ -383,9 +367,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // CONTEXT
-            // ================================================================
+            // ... CONTEXT
             'context' => [
                 'name'   => 'Context',
                 'table'  => 'context',
@@ -400,9 +382,7 @@ class entities {
                 'joins'  => [],
             ],
 
-            // ================================================================
-            // COURSE COMPLETION
-            // ================================================================
+            // ... COURSE COMPLETION
             'course_completion' => [
                 'name'   => 'Course Completion',
                 'table'  => 'course_completions',
@@ -431,9 +411,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ACTIVITY (COURSE MODULE) COMPLETION
-            // ================================================================
+            // ... ACTIVITY (COURSE MODULE) COMPLETION
             'activity_completion' => [
                 'name'   => 'Activity Completion',
                 'table'  => 'course_modules_completion',
@@ -462,9 +440,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // COURSE MODULES
-            // ================================================================
+            // ... COURSE MODULES
             'course_module' => [
                 'name'   => 'Course Module (Activity)',
                 'table'  => 'course_modules',
@@ -507,9 +483,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // GRADE ITEMS
-            // ================================================================
+            // ... GRADE ITEMS
             'grade_item' => [
                 'name'   => 'Grade Item',
                 'table'  => 'grade_items',
@@ -568,9 +542,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // GRADE GRADES (actual user grades)
-            // ================================================================
+            // ... GRADE GRADES (actual user grades)
             'grade_grade' => [
                 'name'   => 'Grade (User Grade)',
                 'table'  => 'grade_grades',
@@ -613,9 +585,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // GRADE CATEGORIES
-            // ================================================================
+            // ... GRADE CATEGORIES
             'grade_category' => [
                 'name'   => 'Grade Category',
                 'table'  => 'grade_categories',
@@ -645,9 +615,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // QUIZ
-            // ================================================================
+            // ... QUIZ
             'quiz' => [
                 'name'   => 'Quiz',
                 'table'  => 'quiz',
@@ -690,9 +658,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // QUIZ ATTEMPTS
-            // ================================================================
+            // ... QUIZ ATTEMPTS
             'quiz_attempt' => [
                 'name'   => 'Quiz Attempt',
                 'table'  => 'quiz_attempts',
@@ -730,9 +696,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ASSIGNMENTS
-            // ================================================================
+            // ... ASSIGNMENTS
             'assign' => [
                 'name'   => 'Assignment',
                 'table'  => 'assign',
@@ -789,9 +753,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ASSIGNMENT SUBMISSIONS
-            // ================================================================
+            // ... ASSIGNMENT SUBMISSIONS
             'assign_submission' => [
                 'name'   => 'Assignment Submission',
                 'table'  => 'assign_submission',
@@ -823,9 +785,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // ASSIGNMENT GRADES
-            // ================================================================
+            // ... ASSIGNMENT GRADES
             'assign_grade' => [
                 'name'   => 'Assignment Grade',
                 'table'  => 'assign_grades',
@@ -855,9 +815,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // FORUMS
-            // ================================================================
+            // ... FORUMS
             'forum' => [
                 'name'   => 'Forum',
                 'table'  => 'forum',
@@ -904,9 +862,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // FORUM DISCUSSIONS
-            // ================================================================
+            // ... FORUM DISCUSSIONS
             'forum_discussion' => [
                 'name'   => 'Forum Discussion',
                 'table'  => 'forum_discussions',
@@ -948,9 +904,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // FORUM POSTS
-            // ================================================================
+            // ... FORUM POSTS
             'forum_post' => [
                 'name'   => 'Forum Post',
                 'table'  => 'forum_posts',
@@ -990,9 +944,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // COHORTS
-            // ================================================================
+            // ... COHORTS
             'cohort' => [
                 'name'   => 'Cohort',
                 'table'  => 'cohort',
@@ -1019,9 +971,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // COHORT MEMBERS
-            // ================================================================
+            // ... COHORT MEMBERS
             'cohort_member' => [
                 'name'   => 'Cohort Member',
                 'table'  => 'cohort_members',
@@ -1047,9 +997,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // GROUPS
-            // ================================================================
+            // ... GROUPS
             'group' => [
                 'name'   => 'Group',
                 'table'  => 'groups',
@@ -1082,9 +1030,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // GROUP MEMBERS
-            // ================================================================
+            // ... GROUP MEMBERS
             'group_member' => [
                 'name'   => 'Group Member',
                 'table'  => 'groups_members',
@@ -1112,9 +1058,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // STANDARD LOG
-            // ================================================================
+            // ... STANDARD LOG
             'log' => [
                 'name'   => 'Activity Log',
                 'table'  => 'logstore_standard_log',
@@ -1157,9 +1101,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // USER LAST ACCESS PER COURSE
-            // ================================================================
+            // ... USER LAST ACCESS PER COURSE
             'user_lastaccess' => [
                 'name'   => 'User Last Access (per Course)',
                 'table'  => 'user_lastaccess',
@@ -1185,9 +1127,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // BADGES
-            // ================================================================
+            // ... BADGES
             'badge' => [
                 'name'   => 'Badge',
                 'table'  => 'badge',
@@ -1235,9 +1175,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // BADGE ISSUED
-            // ================================================================
+            // ... BADGE ISSUED
             'badge_issued' => [
                 'name'   => 'Badge Issued',
                 'table'  => 'badge_issued',
@@ -1267,9 +1205,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // COMPETENCIES
-            // ================================================================
+            // ... COMPETENCIES
             'competency' => [
                 'name'   => 'Competency',
                 'table'  => 'competency',
@@ -1302,9 +1238,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // USER COMPETENCIES
-            // ================================================================
+            // ... USER COMPETENCIES
             'user_competency' => [
                 'name'   => 'User Competency',
                 'table'  => 'competency_usercomp',
@@ -1336,9 +1270,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // MESSAGES
-            // ================================================================
+            // ... MESSAGES
             'message' => [
                 'name'   => 'Message',
                 'table'  => 'messages',
@@ -1364,9 +1296,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // SCORM
-            // ================================================================
+            // ... SCORM
             'scorm' => [
                 'name'   => 'SCORM Activity',
                 'table'  => 'scorm',
@@ -1426,9 +1356,7 @@ class entities {
                 ],
             ],
 
-            // ================================================================
-            // SCORM TRACKING
-            // ================================================================
+            // ... SCORM TRACKING
             'scorm_track' => [
                 'name'   => 'SCORM Tracking',
                 'table'  => 'scorm_scoes_track',

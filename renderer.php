@@ -22,10 +22,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
+/**
+ * Renderer class for Query Builder output.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class report_querybuilder_renderer extends plugin_renderer_base {
+
+    /**
+     * Renders the main page for the Query Builder.
+     *
+     * @return string HTML for the main page.
+     */
     public function main_page() {
         return html_writer::div('Query Builder UI goes here');
     }
 }
-

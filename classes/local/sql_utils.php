@@ -24,8 +24,6 @@
 
 namespace report_querybuilder\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * SQL utility functions for the Query Builder.
  *
@@ -71,23 +69,23 @@ class sql_utils {
         require_once($CFG->dirroot . '/report/querybuilder/classes/domain/entities.php');
         $entities = \report_querybuilder\domain\entities::list();
 
-        // Build a table name to entity key map
-        $tableToKey = [];
+        // Build a table name to entity key map.
+        $tabletokey = [];
         foreach ($entities as $key => $entity) {
             if (!empty($entity['table'])) {
-                $tableToKey[$entity['table']] = $key;
+                $tabletokey[$entity['table']] = $key;
             }
         }
 
         $state = [];
 
-        // Parse base table (FROM {tablename} [alias])
+        // Parse base table (FROM {tablename} [alias]).
         if (preg_match('/FROM\s+\{(\w+)\}(?:\s+\w+)?/i', $sql, $matches)) {
             $tablename = $matches[1];
-            $state['base'] = isset($tableToKey[$tablename]) ? $tableToKey[$tablename] : $tablename;
+            $state['base'] = isset($tabletokey[$tablename]) ? $tabletokey[$tablename] : $tablename;
         }
 
-        // Parse selected fields (SELECT ...)
+        // Parse selected fields (SELECT ...).
         if (preg_match('/SELECT\s+(.*?)\s+FROM/i', $sql, $matches)) {
             $fields = explode(',', $matches[1]);
             $state['fields'] = array_map(function($f) {
@@ -100,7 +98,7 @@ class sql_utils {
             }, $fields);
         }
 
-        // Parse WHERE clause for a simple filter (optional)
+        // Parse WHERE clause for a simple filter (optional).
         if (preg_match('/WHERE\s+(.*?)\s*(LIMIT|$)/is', $sql, $matches)) {
             $where = $matches[1];
             if (preg_match('/(\w+\.\w+)\s*([=<>]+)\s*(.+)/', $where, $w)) {
@@ -110,21 +108,21 @@ class sql_utils {
             }
         }
 
-        // Parse joins (JOIN {tablename} [alias])
+        // Parse joins (JOIN {tablename} [alias]).
         if (!empty($state['base']) && isset($entities[$state['base']]['joins'])) {
             $joinsdef = $entities[$state['base']]['joins'];
             if (preg_match_all('/JOIN\s+\{(\w+)\}(?:\s+\w+)?/i', $sql, $matches)) {
-                $tableJoins = $matches[1];
-                $joinKeys = [];
-                foreach ($tableJoins as $table) {
+                $tablejoins = $matches[1];
+                $joinkeys = [];
+                foreach ($tablejoins as $table) {
                     foreach ($joinsdef as $key => $join) {
                         if ($join['table'] === $table) {
-                            $joinKeys[] = $key;
+                            $joinkeys[] = $key;
                             break;
                         }
                     }
                 }
-                $state['joins'] = $joinKeys;
+                $state['joins'] = $joinkeys;
             }
         }
 

@@ -24,8 +24,6 @@
 
 namespace report_querybuilder\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for managing CRUD operations on saved queries.
  *
@@ -82,14 +80,14 @@ class query_manager {
         if (!$record) {
             return false;
         }
-        $record->name         = $name;
-        $record->querytext    = $sql;
-	$record->category     = $category;
+        $record->name = $name;
+        $record->querytext = $sql;
+        $record->category = $category;
         $record->timemodified = time();
         return $DB->update_record('report_querybuilder_queries', $record);
     }
 
-     /**
+    /**
      * Insert a new saved query.
      *
      * @param string $name Query name.
@@ -100,13 +98,12 @@ class query_manager {
     public static function insert($name, $sql, $category = null) {
         global $DB;
         $record = (object)[
-            'name'         => $name,
-            'querytext'    => $sql,
-	    'category'	   => $category,
-            'timecreated'  => time(),
-            'timemodified' => time()
+            'name' => $name,
+            'querytext' => $sql,
+            'category' => $category,
+            'timecreated' => time(),
+            'timemodified' => time(),
         ];
         return $DB->insert_record('report_querybuilder_queries', $record);
     }
 }
-

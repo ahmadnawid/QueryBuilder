@@ -50,11 +50,11 @@ class builder_form extends \moodleform {
         $entities = entities::list();
 
         // Values passed from index.php via customdata.
-        $base          = $this->_customdata['base'] ?? null;
-        $joinsSelected = $this->_customdata['joins'] ?? [];
-        $filterField   = $this->_customdata['filter_field'] ?? '';
-        $filterOp      = $this->_customdata['filter_op'] ?? '';
-        $filterValue   = $this->_customdata['filter_value'] ?? '';
+        $base         = $this->_customdata['base'] ?? null;
+        $joinsselected = $this->_customdata['joins'] ?? [];
+        $filterfield   = $this->_customdata['filter_field'] ?? '';
+        $filterop      = $this->_customdata['filter_op'] ?? '';
+        $filtervalue   = $this->_customdata['filter_value'] ?? '';
 
         // Base entity selector.
         $entityoptions = [];
@@ -63,7 +63,7 @@ class builder_form extends \moodleform {
         }
 
         $mform->addElement('select', 'base', get_string('baseentity', 'report_querybuilder'), $entityoptions, [
-            'onchange' => 'this.form.submit();'
+            'onchange' => 'this.form.submit();',
         ]);
         $mform->setType('base', PARAM_TEXT);
         if ($base) {
@@ -91,32 +91,31 @@ class builder_form extends \moodleform {
 
         $mform->addElement('select', 'joins', get_string('joins', 'report_querybuilder'), $joinoptions);
         $mform->getElement('joins')->setMultiple(true);
-        if (!empty($joinsSelected)) {
-            $mform->setDefault('joins', $joinsSelected);
+        if (!empty($joinsselected)) {
+            $mform->setDefault('joins', $joinsselected);
         }
 
         // Filter field.
         $mform->addElement('text', 'filter_field', get_string('filterfield', 'report_querybuilder'));
         $mform->setType('filter_field', PARAM_TEXT);
-        $mform->setDefault('filter_field', $filterField);
+        $mform->setDefault('filter_field', $filterfield);
 
         // Filter operator.
         $mform->addElement('select', 'filter_op', get_string('filterop', 'report_querybuilder'), [
             '='    => '=',
             '>'    => '>',
             '<'    => '<',
-            'LIKE' => 'LIKE'
+            'LIKE' => 'LIKE',
         ]);
-        if ($filterOp) {
-            $mform->setDefault('filter_op', $filterOp);
+        if ($filterop) {
+            $mform->setDefault('filter_op', $filterop);
         }
 
         // Filter value.
         $mform->addElement('text', 'filter_value', get_string('filtervalue', 'report_querybuilder'));
         $mform->setType('filter_value', PARAM_TEXT);
-        $mform->setDefault('filter_value', $filterValue);
+        $mform->setDefault('filter_value', $filtervalue);
 
         $this->add_action_buttons(false, get_string('generatesql', 'report_querybuilder'));
     }
 }
-

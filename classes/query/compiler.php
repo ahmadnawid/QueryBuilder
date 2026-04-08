@@ -24,8 +24,6 @@
 
 namespace report_querybuilder\query;
 
-defined('MOODLE_INTERNAL') || die();
-
 use report_querybuilder\domain\entities;
 
 /**
@@ -63,8 +61,8 @@ class compiler {
             'filter' => [
                 'field' => trim((string)$filterfield),
                 'op'    => trim((string)$filterop),
-                'value' => trim((string)$filtervalue)
-            ]
+                'value' => trim((string)$filtervalue),
+            ],
         ];
     }
 
