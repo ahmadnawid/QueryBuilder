@@ -87,7 +87,12 @@ class renderer extends \plugin_renderer_base {
         $countsql = "SELECT COUNT(*) FROM ($cleansql) q";
         $total = $DB->count_records_sql($countsql);
 
-        $table->pagesize(15, $total);
+	if ($table->is_downloading()) {
+            $table->pagesize($total, $total);
+	} else {
+    	    $table->pagesize(15, $total);
+	}
+
         $table->download_buttons();
         $table->set_attribute('class', 'generaltable generalbox querybuilder-table');
         $table->set_attribute('style', 'width:100%');
@@ -114,8 +119,11 @@ class renderer extends \plugin_renderer_base {
         // Stream database results.
         $recordset = $DB->get_recordset_sql($sql, null, $limitfrom, $limitnum);
 
-        foreach ($recordset as $record) {
-            $table->add_data(array_values((array)$record));
+	foreach ($recordset as $record) {
+    	    $row = array_map(function($v) {
+                return $v === null ? '' : $v;
+            }, array_values((array)$record));
+            $table->add_data($row);
         }
 
         $recordset->close();
