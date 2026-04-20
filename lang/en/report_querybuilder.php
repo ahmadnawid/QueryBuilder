@@ -76,6 +76,7 @@ $string['query_updated']            = 'Query updated successfully';
 $string['querybuilder:view']        = 'View Query Builder';
 $string['select_saved_query']       = 'Select saved query';
 $string['sql_editor_help']          = 'Write a SELECT query. Use {tablename} Moodle table prefix notation, e.g. {user}, {course}.';
+$string['sql_error'] = 'Database error:';
 $string['sql_preview_heading']      = 'SQL Preview';
 $string['sql_results_heading']      = 'SQL Results';
 $string['sql_too_complex']          = 'This SQL cannot be converted to the builder. Please simplify it or reset.';

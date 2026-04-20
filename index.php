@@ -53,42 +53,70 @@ $advanced = optional_param('advanced', 0, PARAM_BOOL);
 
 if (!empty($advsql) && !$advanced) {
     $download = optional_param('download', '', PARAM_ALPHA);
+
     if (!$download) {
         require_sesskey();
     }
-    $error = sql_validator::validate($advsql);
 
+    // Validate first — redirect before any output if invalid.
+    $error = sql_validator::validate($advsql);
+    if ($error) {
+        redirect(
+            new moodle_url('/report/querybuilder/index.php', [
+                'advanced' => 1,
+                'advsql'   => $advsql,
+            ]),
+            $error,
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
+    }
+
+    // Test the query before outputting any HTML.
+    // This catches database errors like SELECT * with no table.
+    try {
+        global $DB;
+        $testrecordset = $DB->get_recordset_sql($advsql, null, 0, 1);
+        $columns = [];
+        if ($testrecordset->valid()) {
+            $first   = $testrecordset->current();
+            $columns = array_keys((array)$first);
+        }
+        $testrecordset->close();
+    } catch (Exception $e) {
+        // Redirect before any output — safe.
+        redirect(
+            new moodle_url('/report/querybuilder/index.php', [
+                'advanced' => 1,
+                'advsql'   => $advsql,
+            ]),
+            get_string('sql_error', 'report_querybuilder') . ' ' . s($e->getMessage()),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
+    }
+
+    // Only reach here if query is valid — safe to output header now.
     if (!$download) {
         echo $OUTPUT->header();
-        echo html_writer::tag('h3', get_string('sql_results_heading', 'report_querybuilder'));
+        echo $OUTPUT->heading(
+            get_string('sql_results_heading', 'report_querybuilder'), 3
+        );
     }
 
-    if ($error) {
-        echo $OUTPUT->notification(s($error), 'error');
+    $renderer = $PAGE->get_renderer('report_querybuilder');
+    if ($columns) {
+        echo $renderer->render_results_table($columns, $advsql, $download);
     } else {
-        try {
-            global $DB;
-            $recordset = $DB->get_recordset_sql($advsql);
-            $columns = [];
-            if ($recordset->valid()) {
-                $first = $recordset->current();
-                $columns = array_keys((array)$first);
-            }
-            $recordset->close();
-
-            $renderer = $PAGE->get_renderer('report_querybuilder');
-            if ($columns) {
-                echo $renderer->render_results_table($columns, $advsql, $download);
-            } else {
-                echo $OUTPUT->notification('No results found.', 'info');
-            }
-            if (!$download) {
-                echo $renderer->back_button();
-            }
-        } catch (Exception $e) {
-            echo $OUTPUT->notification(s($e->getMessage()), 'error');
-        }
+        echo $OUTPUT->notification(
+            get_string('no_results', 'report_querybuilder'), 'info'
+        );
     }
+
+    if (!$download) {
+        echo $renderer->back_button();
+    }
+
     if (!$download) {
         echo $OUTPUT->footer();
     }
@@ -421,19 +449,6 @@ QUERYJS;
         $togglesql = $sqlcontent;
     }
 
-    echo html_writer::start_div('d-flex justify-content-between align-items-center mb-2');
-    echo $OUTPUT->heading(get_string('advanced_editor_heading', 'report_querybuilder'), 3, 'mb-0');
-    echo html_writer::link(
-        new moodle_url('/report/querybuilder/index.php', ['sql' => $togglesql]),
-        get_string('btn_switch_builder', 'report_querybuilder'),
-        [
-            'class' => 'btn btn-outline-secondary btn-sm',
-            'id' => 'modeswitchbtn',
-            'title' => get_string('switch_builder_tooltip', 'report_querybuilder'),
-        ]
-    );
-    echo html_writer::end_div();
-
     echo $OUTPUT->box_start('generalbox');
 
     // SQL editor form.
@@ -448,10 +463,23 @@ QUERYJS;
         'name' => 'sesskey',
         'value' => sesskey(),
     ]);
+
+    echo html_writer::start_div('d-flex justify-content-between align-items-center mb-2');
     echo html_writer::tag('label',
         get_string('advanced_editor_heading', 'report_querybuilder'),
         ['for' => 'advsql', 'class' => 'form-label fw-semibold mb-1']
     );
+    echo html_writer::link(
+        new moodle_url('/report/querybuilder/index.php', ['sql' => $togglesql]),
+        get_string('btn_switch_builder', 'report_querybuilder'),
+        [
+            'class' => 'btn btn-outline-secondary btn-sm',
+            'id' => 'modeswitchbtn',
+            'title' => get_string('switch_builder_tooltip', 'report_querybuilder'),
+        ]
+    );
+    echo html_writer::end_div();
+
     echo html_writer::tag('textarea', htmlspecialchars($sqlcontent), [
         'id'           => 'advsql',
         'name'         => 'advsql',
