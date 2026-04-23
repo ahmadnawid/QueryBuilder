@@ -581,7 +581,12 @@ if (!$advanced) {
     echo $OUTPUT->header();
 
     $base = optional_param('base', null, PARAM_TEXT);
-    $joins = isset($_REQUEST['joins']) ? $_REQUEST['joins'] : [];
+    $joins = [];
+    if (!empty($_POST['joins']) && is_array($_POST['joins'])) {
+        $joins = clean_param_array($_POST['joins'], PARAM_TEXT);
+    } else if (!empty($_GET['joins']) && is_array($_GET['joins'])) {
+        $joins = clean_param_array($_GET['joins'], PARAM_TEXT);
+    }
     $filterfield = optional_param('filter_field', '', PARAM_TEXT);
     $filterop = optional_param('filter_op', '', PARAM_TEXT);
     $filtervalue = optional_param('filter_value', '', PARAM_TEXT);
