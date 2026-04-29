@@ -69,6 +69,7 @@ $string['pageheading']              = 'Query Builder';
 $string['pagetitle']                = 'Query Builder';
 $string['pluginname']               = 'Query Builder';
 $string['pluginname_desc']          = 'Build and run custom SQL reports.';
+$string['privacy:metadata'] = 'The Query Builder plugin does not store any personal user data. Saved queries are shared administrative resources available to all users with the report/querybuilder:view capability.';
 $string['query_deleted']            = 'Saved query deleted.';
 $string['query_name_placeholder']   = 'Query name';
 $string['query_saved']              = 'Query saved successfully';
