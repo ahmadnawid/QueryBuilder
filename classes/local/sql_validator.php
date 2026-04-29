@@ -50,7 +50,9 @@ class sql_validator {
             return get_string('error_multistatement', 'report_querybuilder');
         }
 
-        $blocked = ['UPDATE', 'DELETE', 'INSERT', 'DROP', 'ALTER', 'TRUNCATE'];
+	$blocked = ['UPDATE', 'DELETE', 'INSERT', 'DROP', 'ALTER', 'TRUNCATE',
+        	    'EXEC', 'EXECUTE', 'CREATE', 'REPLACE', 'GRANT', 'REVOKE',
+            	    'MERGE', 'CALL', 'LOAD'];
         foreach ($blocked as $word) {
             if (preg_match('/\b' . $word . '\b/i', $sql)) {
                 return get_string('error_dangerous_keyword', 'report_querybuilder') . $word;

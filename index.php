@@ -47,8 +47,8 @@ $PAGE->set_heading(get_string('pageheading', 'report_querybuilder'));
 
 $PAGE->requires->jquery(); // Moodle's built-in jQuery.
 
-$sqlparam = optional_param('sql', '', PARAM_RAW);
-$advsql = optional_param('advsql', '', PARAM_RAW);
+$sqlparam = optional_param('sql', '', PARAM_RAW);    // SQL text — sanitised via sql_validator before execution, escaped on output via htmlspecialchars/s()
+$advsql   = optional_param('advsql', '', PARAM_RAW); // SQL text — sanitised via sql_validator before execution, escaped on output via htmlspecialchars/s()
 $advanced = optional_param('advanced', 0, PARAM_BOOL);
 
 if (!empty($advsql) && !$advanced) {
@@ -73,10 +73,18 @@ if (!empty($advsql) && !$advanced) {
     }
 
     // Test the query before outputting any HTML.
-    // This catches database errors like SELECT * with no table.
     try {
         global $DB;
-        $testrecordset = $DB->get_recordset_sql($advsql, null, 0, 1);
+
+        // Strip existing LIMIT/OFFSET before adding our test LIMIT 1.
+        $testsql = sql_utils::clean_sql($advsql);
+        if (!sql_utils::has_limit_or_offset($testsql)) {
+            $testrecordset = $DB->get_recordset_sql($testsql, null, 0, 1);
+        } else {
+            // SQL already has LIMIT — run as-is, Moodle won't add another.
+            $testrecordset = $DB->get_recordset_sql($testsql);
+        }
+
         $columns = [];
         if ($testrecordset->valid()) {
             $first   = $testrecordset->current();
@@ -84,7 +92,6 @@ if (!empty($advsql) && !$advanced) {
         }
         $testrecordset->close();
     } catch (Exception $e) {
-        // Redirect before any output — safe.
         redirect(
             new moodle_url('/report/querybuilder/index.php', [
                 'advanced' => 1,
@@ -95,7 +102,6 @@ if (!empty($advsql) && !$advanced) {
             \core\output\notification::NOTIFY_ERROR
         );
     }
-
     // Only reach here if query is valid — safe to output header now.
     if (!$download) {
         echo $OUTPUT->header();
@@ -127,7 +133,7 @@ if ($advanced) {
 
     $saved = query_manager::get_all();
     $loadid = optional_param('loadquery', 0, PARAM_INT);
-    $newquery = optional_param('newbutton', null, PARAM_RAW);
+    $newquery = optional_param('newbutton', null, PARAM_ALPHA);
     $prefill = null;
     $shownewform = false;
     if ($newquery !== null) {
@@ -138,12 +144,12 @@ if ($advanced) {
     }
 
     // Only set $prefill when Edit is clicked.
-    if (optional_param('editbutton', null, PARAM_RAW) && $loadid) {
+    if (optional_param('editbutton', null, PARAM_ALPHA) && $loadid) {
         $prefill = query_manager::get($loadid);
     }
 
     // Delete.
-    if (optional_param('deletebutton', null, PARAM_RAW)) {
+    if (optional_param('deletebutton', null, PARAM_ALPHA)) {
         require_sesskey();
         $deleteid = $loadid ?: optional_param('savedqueryid', 0, PARAM_INT);
         if ($deleteid) {
@@ -158,13 +164,22 @@ if ($advanced) {
     }
 
     // Save.
-    if (optional_param('savequery', null, PARAM_RAW)) {
+    if (optional_param('savequery', null, PARAM_ALPHA)) {
         require_sesskey();
         $savename = required_param('savename', PARAM_TEXT);
-        $query = required_param('query', PARAM_RAW);
+        $query = required_param('query', PARAM_RAW); // SQL text — PARAM_RAW required; validated below before storage
         $savedqueryid = optional_param('savedqueryid', 0, PARAM_INT);
         $category = optional_param('category', '', PARAM_TEXT);
 
+	$error = sql_validator::validate($query);
+	if ($error) {
+            redirect(
+                new moodle_url('/report/querybuilder/index.php', ['advanced' => 1]),
+                $error,
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
+        }
         if ($savename && $query) {
             if ($savedqueryid) {
                 query_manager::update($savedqueryid, $savename, $query, $category);
@@ -410,7 +425,7 @@ QUERYJS;
             'type' => 'hidden',
             'name' => 'query',
             'id'   => 'hiddenquery',
-            'value' => htmlspecialchars($sqlcontent),
+            'value' => s($sqlcontent),
         ]);
         echo html_writer::empty_tag('input', [
             'type'        => 'text',
@@ -480,7 +495,7 @@ QUERYJS;
     );
     echo html_writer::end_div();
 
-    echo html_writer::tag('textarea', htmlspecialchars($sqlcontent), [
+    echo html_writer::tag('textarea', s($sqlcontent), [
         'id'           => 'advsql',
         'name'         => 'advsql',
         'class'        => 'form-control font-monospace',

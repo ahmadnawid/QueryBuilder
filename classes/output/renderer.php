@@ -58,6 +58,10 @@ class renderer extends \plugin_renderer_base {
     public function render_results_table($columns, $sql, $download = '') {
         global $DB;
 
+	// Strip any existing LIMIT/OFFSET from the SQL.
+        // flexible_table handles pagination by adding its own LIMIT/OFFSET.
+        // Having two LIMIT clauses causes a PostgreSQL syntax error.
+        $sql = preg_replace('/\s+LIMIT\s+\d+(\s+OFFSET\s+\d+)?\s*$/i', '', trim($sql));
         $table = new \flexible_table('querybuilder-results');
 
         // Define columns.
