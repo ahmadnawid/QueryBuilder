@@ -31,12 +31,4 @@
  */
 class report_querybuilder_renderer extends plugin_renderer_base {
 
-    /**
-     * Renders the main page for the Query Builder.
-     *
-     * @return string HTML for the main page.
-     */
-    public function main_page() {
-        return html_writer::div('Query Builder UI goes here');
-    }
 }

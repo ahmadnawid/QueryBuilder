@@ -203,7 +203,7 @@ if ($advanced) {
                 );
             }
         } else {
-            echo $OUTPUT->notification('Please enter a name and query.', 'error');
+	    echo $OUTPUT->notification(get_string('error_name_and_query', 'report_querybuilder'), 'error');
         }
     }
 
@@ -614,10 +614,10 @@ if (!$advanced) {
 
     // Optional: Show a warning if SQL is too complex.
     if (!empty($sqlparam) && !$builderstate) {
-        echo html_writer::div(
-            'This SQL is too complex to edit in the builder. Please simplify it or reset.',
-            'alert alert-warning'
-        );
+	echo $OUTPUT->notification(
+        get_string('sql_too_complex', 'report_querybuilder'),
+        'warning'
+	);
     }
 
     $form = new builder_form(null, [
