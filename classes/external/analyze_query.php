@@ -17,9 +17,8 @@
 namespace report_querybuilder\external;
 
 defined('MOODLE_INTERNAL') || die();
-
+global $CFG;
 require_once($CFG->libdir . '/externallib.php');
-require_once($CFG->dirroot . '/report/querybuilder/classes/local/sql_validator.php');
 
 use external_function_parameters;
 use external_value;

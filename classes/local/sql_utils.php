@@ -65,8 +65,6 @@ class sql_utils {
      * @return array|null The builder state array or null if not parseable.
      */
     public static function parse_sql_to_builder_state($sql) {
-        global $CFG;
-        require_once($CFG->dirroot . '/report/querybuilder/classes/domain/entities.php');
         $entities = \report_querybuilder\domain\entities::list();
 
         // Build a table name to entity key map.
