@@ -1,3 +1,10 @@
+/**
+ * Styles for Query Builder report plugin.
+ *
+ * @package    report_querybuilder
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 #page-report-querybuilder-index nav.pagination:first-of-type {
     display: none;
 }
