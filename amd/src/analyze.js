@@ -20,7 +20,7 @@
  * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notification) {
+define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], function(Ajax, Str, Notification, Templates) {
 
     return {
         init: function() {
@@ -46,7 +46,7 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
                 var sql = document.getElementById('advsql').value.trim();
 
                 if (!sql) {
-			alert('Please enter a SQL query to analyze.');
+                    alert('Please enter a SQL query to analyze.');
                     return;
                 }
 
@@ -54,9 +54,15 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
                 spinner.style.display = 'inline-block';
                 panel.style.display   = 'block';
                 warnbox.innerHTML     = '';
-                tablebox.innerHTML    = '<em>Running EXPLAIN, please wait...</em>';
 
-                // Load all strings first, then call external function
+                // Show loading state via template.
+                Templates.render('report_querybuilder/explain_loading', {
+                    message: 'Running EXPLAIN, please wait...'
+                }).then(function(html) {
+                    tablebox.innerHTML = html;
+                    return;
+                }).catch(Notification.exception);
+
                 Str.get_strings([
                     {key: 'explain_error',       component: 'report_querybuilder'},
                     {key: 'explain_warnings',     component: 'report_querybuilder'},
@@ -81,7 +87,6 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
                     var strFilter   = strings[8];
                     var strAnalyze  = strings[9];
 
-                    // Call the Moodle External API
                     Ajax.call([{
                         methodname: 'report_querybuilder_analyze_query',
                         args:       {sql: sql},
@@ -91,39 +96,34 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
                         spinner.style.display = 'none';
                         btn.textContent       = strAnalyze;
 
-                        // Warnings box
-                        if (data.warnings && data.warnings.length > 0) {
-                            var whtml = '<div class="mb-2"><strong>' + strWarnings + '</strong></div>'
-                                + '<ul class="list-group">';
-                            data.warnings.forEach(function(w) {
-                                var cls = w.level === 'danger'
-                                    ? 'list-group-item list-group-item-danger'
-                                    : 'list-group-item list-group-item-warning';
-                                whtml += '<li class="' + cls + '">&#9888; ' + w.message + '</li>';
-                            });
-                            whtml += '</ul>';
-                            warnbox.innerHTML = whtml;
-                        } else {
-                            warnbox.innerHTML = '<div class="alert alert-success">&#10004; ' + strNowarn + '</div>';
-                        }
+                        // Render warnings via template.
+                        var warningsdata = {
+                            has_warnings:     data.warnings && data.warnings.length > 0,
+                            warnings_heading: strWarnings,
+                            no_warnings_message: strNowarn,
+                            warnings: (data.warnings || []).map(function(w) {
+                                return {
+                                    message:   w.message,
+                                    is_danger: w.level === 'danger',
+                                };
+                            }),
+                        };
 
-                        // Plan table
-                        var thtml = '<table class="table table-sm table-bordered generaltable">';
-                        thtml += '<thead class="table-dark"><tr>'
-                            + '<th>' + strNode     + '</th>'
-                            + '<th>' + strRelation + '</th>'
-                            + '<th>' + strIndex    + '</th>'
-                            + '<th>' + strRows     + '</th>'
-                            + '<th>' + strCost     + '</th>'
-                            + '<th>' + strFilter   + '</th>'
-                            + '</tr></thead><tbody>';
+                        Templates.render('report_querybuilder/explain_warnings', warningsdata)
+                        .then(function(html) {
+                            warnbox.innerHTML = html;
+                            return;
+                        }).catch(Notification.exception);
 
-                        data.steps.forEach(function(step) {
-                            var lnode = step.node_type ? step.node_type.toLowerCase() : '';
-
+                        // Build steps data for table template.
+                        var steps = (data.steps || []).map(function(step) {
+                            var lnode    = step.node_type ? step.node_type.toLowerCase() : '';
                             var rowclass = '';
+
                             if (step.warnings && step.warnings.length > 0) {
-                                var hasdan = step.warnings.some(function(w) { return w.level === 'danger'; });
+                                var hasdan = step.warnings.some(function(w) {
+                                    return w.level === 'danger';
+                                });
                                 rowclass = hasdan ? 'table-danger' : 'table-warning';
                             }
 
@@ -131,15 +131,6 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
                             for (var i = 0; i < step.depth; i++) {
                                 indent += '<span style="display:inline-block;width:18px;">&#8627;</span>';
                             }
-
-                            var noindex = ['sort', 'hash', 'nested loop', 'merge join', 'hash join', 'aggregate'];
-                            var isnoindexnode = noindex.some(function(t) { return lnode.indexOf(t) !== -1; });
-
-                            var indexcell = step.index
-                                ? '<span class="badge bg-success">' + step.index + '</span>'
-                                : isnoindexnode
-                                    ? '<span class="text-muted">—</span>'
-                                    : '<span class="badge bg-danger">(none)</span>';
 
                             var nodecell = indent + step.node_type;
                             if (lnode.indexOf('seq scan') !== -1) {
@@ -149,32 +140,61 @@ define(['core/ajax', 'core/str', 'core/notification'], function(Ajax, Str, Notif
                                     + step.node_type.replace(/index scan|index only scan|bitmap index scan/i, 'Scan').trim();
                             }
 
-                            thtml += '<tr class="' + rowclass + '">'
-                                + '<td>' + nodecell + '</td>'
-                                + '<td>' + (step.relation  || '') + '</td>'
-                                + '<td>' + indexcell + '</td>'
-                                + '<td>' + (step.rows_est   !== null ? Number(step.rows_est).toLocaleString() : '') + '</td>'
-                                + '<td>' + (step.cost_total !== null ? step.cost_total : '') + '</td>'
-                                + '<td>' + (step.filter     || '') + '</td>'
-                                + '</tr>';
+                            var noindex      = ['sort', 'hash', 'nested loop', 'merge join', 'hash join', 'aggregate'];
+                            var isnoindexnode = noindex.some(function(t) { return lnode.indexOf(t) !== -1; });
+                            var indexcell    = step.index
+                                ? '<span class="badge bg-success">' + step.index + '</span>'
+                                : isnoindexnode
+                                    ? '<span class="text-muted">&#8212;</span>'
+                                    : '<span class="badge bg-danger">(none)</span>';
+
+                            return {
+                                row_class:      rowclass,
+                                node_cell:      nodecell,
+                                relation:       step.relation  || '',
+                                index_cell:     indexcell,
+                                rows_formatted: step.rows_est !== null
+                                    ? Number(step.rows_est).toLocaleString() : '',
+                                cost_total:     step.cost_total !== null ? step.cost_total : '',
+                                filter:         step.filter    || '',
+                            };
                         });
 
-                        thtml += '</tbody></table>';
-                        tablebox.innerHTML = thtml;
-                        panel.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                        // Render plan table via template.
+                        var tabledata = {
+                            col_node:     strNode,
+                            col_relation: strRelation,
+                            col_index:    strIndex,
+                            col_rows:     strRows,
+                            col_cost:     strCost,
+                            col_filter:   strFilter,
+                            steps:        steps,
+                        };
 
-		}).catch(function(err) {
-    btn.disabled          = false;
-    spinner.style.display = 'none';
-    var errmsg = err.message || err.error || JSON.stringify(err);
-    tablebox.innerHTML    = '<div class="alert alert-danger">'
-        + strError + ' ' + errmsg + '</div>';
-});
+                        Templates.render('report_querybuilder/explain_table', tabledata)
+                        .then(function(html) {
+                            tablebox.innerHTML = html;
+                            panel.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                            return;
+                        }).catch(Notification.exception);
 
-                }).catch(function() {
-                    btn.disabled          = false;
-                    spinner.style.display = 'none';
-                });
+                        return;
+
+                    }).catch(function(err) {
+                        btn.disabled          = false;
+                        spinner.style.display = 'none';
+                        var errmsg = err.message || err.error || JSON.stringify(err);
+                        Templates.render('report_querybuilder/explain_loading', {
+                            message: strError + ' ' + errmsg
+                        }).then(function(html) {
+                            tablebox.innerHTML = html;
+                            return;
+                        }).catch(Notification.exception);
+                    });
+
+                    return;
+
+                }).catch(Notification.exception);
             });
         }
     };

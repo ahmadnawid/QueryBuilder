@@ -1,0 +1,38 @@
+{{!
+    @template report_querybuilder/explain_table
+
+    Explain plan results table.
+
+    Context variables:
+    * col_node - Column header string
+    * col_relation - Column header string
+    * col_index - Column header string
+    * col_rows - Column header string
+    * col_cost - Column header string
+    * col_filter - Column header string
+    * steps - Array of step objects
+}}
+<table class="table table-sm table-bordered generaltable">
+    <thead class="table-dark">
+        <tr>
+            <th>{{col_node}}</th>
+            <th>{{col_relation}}</th>
+            <th>{{col_index}}</th>
+            <th>{{col_rows}}</th>
+            <th>{{col_cost}}</th>
+            <th>{{col_filter}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#steps}}
+        <tr class="{{row_class}}">
+            <td>{{{node_cell}}}</td>
+            <td>{{relation}}</td>
+            <td>{{{index_cell}}}</td>
+            <td>{{rows_formatted}}</td>
+            <td>{{cost_total}}</td>
+            <td>{{filter}}</td>
+        </tr>
+        {{/steps}}
+    </tbody>
+</table>

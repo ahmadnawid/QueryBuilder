@@ -1,0 +1,23 @@
+{{!
+    @template report_querybuilder/explain_warnings
+
+    Warnings list for the explain plan panel.
+
+    Context variables:
+    * has_warnings - Boolean, true if there are warnings
+    * warnings - Array of warning objects with level and message
+    * no_warnings_message - String shown when no warnings
+}}
+{{#has_warnings}}
+<div class="mb-2"><strong>{{warnings_heading}}</strong></div>
+<ul class="list-group">
+    {{#warnings}}
+    <li class="list-group-item {{#is_danger}}list-group-item-danger{{/is_danger}}{{^is_danger}}list-group-item-warning{{/is_danger}}">
+        &#9888; {{message}}
+    </li>
+    {{/warnings}}
+</ul>
+{{/has_warnings}}
+{{^has_warnings}}
+<div class="alert alert-success">&#10004; {{no_warnings_message}}</div>
+{{/has_warnings}}
