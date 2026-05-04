@@ -47,8 +47,8 @@ $PAGE->set_heading(get_string('pageheading', 'report_querybuilder'));
 
 $PAGE->requires->jquery(); // Moodle's built-in jQuery.
 
-$sqlparam = optional_param('sql', '', PARAM_RAW);    // SQL text — sanitised via sql_validator before execution, escaped on output via htmlspecialchars/s()
-$advsql   = optional_param('advsql', '', PARAM_RAW); // SQL text — sanitised via sql_validator before execution, escaped on output via htmlspecialchars/s()
+$sqlparam = optional_param('sql', '', PARAM_RAW);    //SQL text — sanitised via sql_validator before execution.
+$advsql   = optional_param('advsql', '', PARAM_RAW); //SQL text — sanitised via sql_validator before execution.
 $advanced = optional_param('advanced', 0, PARAM_BOOL);
 
 if (!empty($advsql) && !$advanced) {
@@ -106,7 +106,9 @@ if (!empty($advsql) && !$advanced) {
     if (!$download) {
         echo $OUTPUT->header();
         echo $OUTPUT->heading(
-            get_string('sql_results_heading', 'report_querybuilder'), 3
+            get_string('sql_results_heading', 
+		       'report_querybuilder'), 
+		       3
         );
     }
 
@@ -115,7 +117,9 @@ if (!empty($advsql) && !$advanced) {
         echo $renderer->render_results_table($columns, $advsql, $download);
     } else {
         echo $OUTPUT->notification(
-            get_string('no_results', 'report_querybuilder'), 'info'
+            get_string('no_results', 
+		       'report_querybuilder'), 
+		       'info'
         );
     }
 
@@ -129,8 +133,7 @@ if (!empty($advsql) && !$advanced) {
     exit;
 }
 
-if ($advanced) {
-
+if ($advanced){
     $saved = query_manager::get_all();
     $loadid = optional_param('loadquery', 0, PARAM_INT);
     $newquery = optional_param('newbutton', null, PARAM_ALPHA);
@@ -167,7 +170,7 @@ if ($advanced) {
     if (optional_param('savequery', null, PARAM_ALPHA)) {
         require_sesskey();
         $savename = required_param('savename', PARAM_TEXT);
-        $query = required_param('query', PARAM_RAW); // SQL text — PARAM_RAW required; validated below before storage
+        $query = required_param('query', PARAM_RAW); //SQL text — PARAM_RAW required; validated below before storage.
         $savedqueryid = optional_param('savedqueryid', 0, PARAM_INT);
         $category = optional_param('category', '', PARAM_TEXT);
 
