@@ -352,34 +352,14 @@ if ($advanced) {
 
     // End toolbar.
 
-    // Add this JS after the form.
-    $queriesjs = json_encode($filteredbyid);
-    echo <<<QUERYJS
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var select    = document.getElementById('loadqueryselect');
-    var textarea  = document.getElementById('advsql');
-    var editbtn   = document.getElementById('editquerybtn');
-    var deletebtn = document.getElementById('deletequerybtn');
-    var editid    = document.getElementById('editloadquery');
-    var deleteid  = document.getElementById('deleteloadquery');
-    var queries   = $queriesjs;
-
-    if (select && textarea) {
-        select.addEventListener('change', function() {
-            var id = select.value;
-            if (id && queries[id]) {
-                textarea.value = queries[id].querytext;
-            }
-            if (editbtn)   { editbtn.disabled   = !id; }
-            if (deletebtn) { deletebtn.disabled = !id; }
-            if (editid)    { editid.value   = id; }
-            if (deleteid)  { deleteid.value = id; }
-        });
+    $queriesforjs = new stdClass();
+    foreach ($filteredbyid as $id => $q) {
+	$key = (string)$id;
+	$queriesforjs->$key = ['id' => $q->id, 'querytext' => $q->querytext];
     }
-});
-</script>
-QUERYJS;
+    $PAGE->requires->js_call_amd('report_querybuilder/toolbar', 'init', [
+        ['queries' => $queriesforjs],
+    ]);
 
     // Decide what SQL to show in the textarea.
     if ($prefill) {
@@ -563,30 +543,7 @@ QUERYJS;
 
     $PAGE->requires->js_call_amd('report_querybuilder/analyze', 'init');
 
-    $PAGE->requires->js_init_code("
-        document.addEventListener('DOMContentLoaded', function() {
-            var toggle     = document.getElementById('modeswitchbtn');
-            var textarea   = document.getElementById('advsql');
-            var hiddenquery = document.getElementById('hiddenquery');
-            var saveform   = document.getElementById('savequeryform');
-
-            if (toggle && textarea) {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (!textarea.value.trim()) return;
-                    var url = new URL(toggle.href, window.location.origin);
-                    url.searchParams.set('sql', textarea.value);
-                    window.location.href = url.toString();
-                });
-            }
-
-            if (saveform && textarea && hiddenquery) {
-                saveform.addEventListener('submit', function() {
-                    hiddenquery.value = textarea.value;
-                });
-            }
-        });
-    ");
+    $PAGE->requires->js_call_amd('report_querybuilder/editor', 'init');
 
     echo $OUTPUT->footer();
     exit;
