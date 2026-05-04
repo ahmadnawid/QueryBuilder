@@ -47,8 +47,8 @@ $PAGE->set_heading(get_string('pageheading', 'report_querybuilder'));
 
 $PAGE->requires->jquery(); // Moodle's built-in jQuery.
 
-$sqlparam = optional_param('sql', '', PARAM_RAW);    //SQL text — sanitised via sql_validator before execution.
-$advsql   = optional_param('advsql', '', PARAM_RAW); //SQL text — sanitised via sql_validator before execution.
+$sqlparam = optional_param('sql', '', PARAM_RAW);    // SQL text — sanitised via sql_validator before execution.
+$advsql   = optional_param('advsql', '', PARAM_RAW); // SQL text — sanitised via sql_validator before execution.
 $advanced = optional_param('advanced', 0, PARAM_BOOL);
 
 if (!empty($advsql) && !$advanced) {
@@ -106,9 +106,10 @@ if (!empty($advsql) && !$advanced) {
     if (!$download) {
         echo $OUTPUT->header();
         echo $OUTPUT->heading(
-            get_string('sql_results_heading', 
-		       'report_querybuilder'), 
-		       3
+            get_string(
+		    'sql_results_heading',
+		    'report_querybuilder'),
+		    3
         );
     }
 
@@ -117,9 +118,10 @@ if (!empty($advsql) && !$advanced) {
         echo $renderer->render_results_table($columns, $advsql, $download);
     } else {
         echo $OUTPUT->notification(
-            get_string('no_results', 
-		       'report_querybuilder'), 
-		       'info'
+            get_string(
+		    'no_results',
+		    'report_querybuilder'),
+		    'info'
         );
     }
 
@@ -133,7 +135,7 @@ if (!empty($advsql) && !$advanced) {
     exit;
 }
 
-if ($advanced){
+if ($advanced) {
     $saved = query_manager::get_all();
     $loadid = optional_param('loadquery', 0, PARAM_INT);
     $newquery = optional_param('newbutton', null, PARAM_ALPHA);
@@ -170,19 +172,19 @@ if ($advanced){
     if (optional_param('savequery', null, PARAM_ALPHA)) {
         require_sesskey();
         $savename = required_param('savename', PARAM_TEXT);
-        $query = required_param('query', PARAM_RAW); //SQL text — PARAM_RAW required; validated below before storage.
+        $query = required_param('query', PARAM_RAW); // SQL text — PARAM_RAW required; validated below before storage.
         $savedqueryid = optional_param('savedqueryid', 0, PARAM_INT);
         $category = optional_param('category', '', PARAM_TEXT);
 
-	$error = sql_validator::validate($query);
-	if ($error) {
+            $error = sql_validator::validate($query);
+	    if ($error) {
             redirect(
                 new moodle_url('/report/querybuilder/index.php', ['advanced' => 1]),
                 $error,
                 null,
                 \core\output\notification::NOTIFY_ERROR
-            );
-        }
+                );
+    }
         if ($savename && $query) {
             if ($savedqueryid) {
                 query_manager::update($savedqueryid, $savename, $query, $category);
@@ -263,7 +265,8 @@ if ($advanced){
 
     // Saved query selector.
     echo html_writer::start_div('d-flex align-items-center gap-2');
-    echo html_writer::tag('label',
+    echo html_writer::tag(
+        'label',
         get_string('select_saved_query', 'report_querybuilder'),
         ['class' => 'me-1']
     );
@@ -356,10 +359,10 @@ if ($advanced){
     // End toolbar.
 
     $queriesforjs = new stdClass();
-    foreach ($filteredbyid as $id => $q) {
-	$key = (string)$id;
-	$queriesforjs->$key = ['id' => $q->id, 'querytext' => $q->querytext];
-    }
+        foreach ($filteredbyid as $id => $q) {
+	    $key = (string)$id;
+	    $queriesforjs->$key = ['id' => $q->id, 'querytext' => $q->querytext];
+        }
     $PAGE->requires->js_call_amd('report_querybuilder/toolbar', 'init', [
         ['queries' => $queriesforjs],
     ]);
@@ -381,7 +384,7 @@ if ($advanced){
         echo $OUTPUT->heading(
             $prefill
                 ? get_string('btn_edit', 'report_querybuilder') . ': ' . s($prefill->name)
-                : get_string('btn_new',  'report_querybuilder'),
+                : get_string('btn_new', 'report_querybuilder'),
             5
         );
         echo html_writer::start_tag('form', [
@@ -463,7 +466,8 @@ if ($advanced){
     ]);
 
     echo html_writer::start_div('d-flex justify-content-between align-items-center mb-2');
-    echo html_writer::tag('label',
+    echo html_writer::tag(
+        'label',
         get_string('advanced_editor_heading', 'report_querybuilder'),
         ['for' => 'advsql', 'class' => 'form-label fw-semibold mb-1']
     );
@@ -489,7 +493,8 @@ if ($advanced){
 
     // Button row.
     echo html_writer::start_div('mt-3 d-flex gap-2 align-items-center');
-    echo html_writer::tag('button',
+    echo html_writer::tag(
+        'button',
         get_string('btn_run_sql', 'report_querybuilder'),
         [
             'type'    => 'submit',
@@ -501,7 +506,8 @@ if ($advanced){
                           }",
         ]
     );
-    echo html_writer::tag('button',
+    echo html_writer::tag(
+        'button',
         get_string('analyze_query', 'report_querybuilder'),
         ['type' => 'button', 'class' => 'btn btn-outline-secondary', 'id' => 'analyzebtn']
     );
