@@ -130,12 +130,12 @@ class analyze_query extends \external_api {
     }
 
     /**
-     * Recursively flattens the query plan tree into a steps array.
+     * Recursively flattens a query plan node into a linear steps array.
      *
-     * @param array $node The current plan node.
-     * @param array &$steps The steps array to populate.
-     * @param array &$warnings The warnings array to populate.
-     * @param int $depth The current depth in the plan tree.
+     * @param array $node The current plan node being processed.
+     * @param array $steps Reference to the array collecting flattened plan steps.
+     * @param array $warnings Reference to the array collecting warning messages.
+     * @param int $depth Current depth level in the plan tree.
      * @return void
      */
     private static function flatten_plan(array $node, array &$steps, array &$warnings, int $depth): void {
