@@ -33,7 +33,6 @@ defined('MOODLE_INTERNAL') || die();
  * Saved queries are shared administrative resources not linked to individual users.
  */
 class provider implements \core_privacy\local\metadata\null_provider {
-
     /**
      * Returns the reason why this plugin stores no personal data.
      *

@@ -90,7 +90,6 @@ class analyze_query extends \external_api {
                 'steps'    => $steps,
                 'warnings' => $warnings,
             ];
-
         } catch (\Exception $e) {
             throw new \moodle_exception('generalexceptionmessage', 'error', '', $e->getMessage());
         }
@@ -105,14 +104,14 @@ class analyze_query extends \external_api {
         return new external_single_structure([
             'steps' => new external_multiple_structure(
                 new external_single_structure([
-                    'depth'      => new external_value(PARAM_INT,   'Nesting depth'),
-                    'node_type'  => new external_value(PARAM_TEXT,  'Node type'),
-                    'relation'   => new external_value(PARAM_TEXT,  'Table or relation', VALUE_OPTIONAL, ''),
-                    'index'      => new external_value(PARAM_TEXT,  'Index used',        VALUE_OPTIONAL, ''),
-                    'rows_est'   => new external_value(PARAM_FLOAT, 'Estimated rows',    VALUE_OPTIONAL, 0),
-                    'width'      => new external_value(PARAM_INT,   'Plan width',        VALUE_OPTIONAL, 0),
-                    'cost_total' => new external_value(PARAM_FLOAT, 'Total cost',        VALUE_OPTIONAL, 0),
-                    'filter'     => new external_value(PARAM_TEXT,  'Filter condition',  VALUE_OPTIONAL, ''),
+                    'depth'      => new external_value(PARAM_INT, 'Nesting depth'),
+                    'node_type'  => new external_value(PARAM_TEXT, 'Node type'),
+                    'relation'   => new external_value(PARAM_TEXT, 'Table or relation', VALUE_OPTIONAL, ''),
+                    'index'      => new external_value(PARAM_TEXT, 'Index used', VALUE_OPTIONAL, ''),
+                    'rows_est'   => new external_value(PARAM_FLOAT, 'Estimated rows', VALUE_OPTIONAL, 0),
+                    'width'      => new external_value(PARAM_INT, 'Plan width', VALUE_OPTIONAL, 0),
+                    'cost_total' => new external_value(PARAM_FLOAT, 'Total cost', VALUE_OPTIONAL, 0),
+                    'filter'     => new external_value(PARAM_TEXT, 'Filter condition', VALUE_OPTIONAL, ''),
                     'warnings'   => new external_multiple_structure(
                         new external_single_structure([
                             'level'   => new external_value(PARAM_TEXT, 'Warning level'),

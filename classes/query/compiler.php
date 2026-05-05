@@ -34,7 +34,6 @@ use report_querybuilder\domain\entities;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class compiler {
-
     /**
      * Build a simple AST from form data.
      *
@@ -130,4 +129,3 @@ class compiler {
         return $sql;
     }
 }
-

@@ -83,4 +83,3 @@ $string['sql_preview_heading']      = 'SQL Preview';
 $string['sql_results_heading']      = 'SQL Results';
 $string['sql_too_complex']          = 'This SQL cannot be converted to the builder. Please simplify it or reset.';
 $string['switch_builder_tooltip']   = 'Switch to visual builder (only for simple SELECT queries)';
-

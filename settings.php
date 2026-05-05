@@ -31,4 +31,3 @@ if ($hassiteconfig) {
         new moodle_url('/report/querybuilder/index.php')
     ));
 }
-

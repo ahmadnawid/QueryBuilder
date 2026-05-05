@@ -36,7 +36,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends \plugin_renderer_base {
-
     /**
      * Removes ORDER BY clause from a SQL string.
      *
@@ -58,7 +57,7 @@ class renderer extends \plugin_renderer_base {
     public function render_results_table($columns, $sql, $download = '') {
         global $DB;
 
-	// Strip any existing LIMIT/OFFSET from the SQL.
+        // Strip any existing LIMIT/OFFSET from the SQL.
         // flexible_table handles pagination by adding its own LIMIT/OFFSET.
         // Having two LIMIT clauses causes a PostgreSQL syntax error.
         $sql = preg_replace('/\s+LIMIT\s+\d+(\s+OFFSET\s+\d+)?\s*$/i', '', trim($sql));
@@ -91,11 +90,11 @@ class renderer extends \plugin_renderer_base {
         $countsql = "SELECT COUNT(*) FROM ($cleansql) q";
         $total = $DB->count_records_sql($countsql);
 
-	if ($table->is_downloading()) {
+        if ($table->is_downloading()) {
             $table->pagesize($total, $total);
-	} else {
-    	    $table->pagesize(15, $total);
-	}
+        } else {
+            $table->pagesize(15, $total);
+        }
 
         $table->download_buttons();
         $table->set_attribute('class', 'generaltable generalbox querybuilder-table');
@@ -123,11 +122,11 @@ class renderer extends \plugin_renderer_base {
         // Stream database results.
         $recordset = $DB->get_recordset_sql($sql, null, $limitfrom, $limitnum);
 
-	foreach ($recordset as $record) {
-    	    $row = array_map(function($v) {
+        foreach ($recordset as $record) {
+            $row = array_map(function ($v) {
                 return $v === null ? '' : $v;
             }, array_values((array)$record));
-            $table->add_data($row);
+                $table->add_data($row);
         }
 
         $recordset->close();

@@ -32,7 +32,6 @@ namespace report_querybuilder\local;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class sql_utils {
-
     /**
      * Remove trailing semicolon and whitespace.
      *
@@ -86,7 +85,7 @@ class sql_utils {
         // Parse selected fields (SELECT ...).
         if (preg_match('/SELECT\s+(.*?)\s+FROM/i', $sql, $matches)) {
             $fields = explode(',', $matches[1]);
-            $state['fields'] = array_map(function($f) {
+            $state['fields'] = array_map(function ($f) {
                 $f = trim($f);
                 if (strpos($f, '.') !== false) {
                     $parts = explode('.', $f);

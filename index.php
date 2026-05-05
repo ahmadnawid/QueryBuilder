@@ -107,9 +107,10 @@ if (!empty($advsql) && !$advanced) {
         echo $OUTPUT->header();
         echo $OUTPUT->heading(
             get_string(
-		    'sql_results_heading',
-		    'report_querybuilder'),
-		    3
+                'sql_results_heading',
+                'report_querybuilder'
+            ),
+            3
         );
     }
 
@@ -119,9 +120,10 @@ if (!empty($advsql) && !$advanced) {
     } else {
         echo $OUTPUT->notification(
             get_string(
-		    'no_results',
-		    'report_querybuilder'),
-		    'info'
+                'no_results',
+                'report_querybuilder'
+            ),
+            'info'
         );
     }
 
@@ -177,14 +179,14 @@ if ($advanced) {
         $category = optional_param('category', '', PARAM_TEXT);
 
             $error = sql_validator::validate($query);
-	    if ($error) {
+        if ($error) {
             redirect(
                 new moodle_url('/report/querybuilder/index.php', ['advanced' => 1]),
                 $error,
                 null,
                 \core\output\notification::NOTIFY_ERROR
-                );
-    }
+            );
+        }
         if ($savename && $query) {
             if ($savedqueryid) {
                 query_manager::update($savedqueryid, $savename, $query, $category);
@@ -208,7 +210,7 @@ if ($advanced) {
                 );
             }
         } else {
-	    echo $OUTPUT->notification(get_string('error_name_and_query', 'report_querybuilder'), 'error');
+            echo $OUTPUT->notification(get_string('error_name_and_query', 'report_querybuilder'), 'error');
         }
     }
 
@@ -359,10 +361,10 @@ if ($advanced) {
     // End toolbar.
 
     $queriesforjs = new stdClass();
-        foreach ($filteredbyid as $id => $q) {
-	    $key = (string)$id;
-	    $queriesforjs->$key = ['id' => $q->id, 'querytext' => $q->querytext];
-        }
+    foreach ($filteredbyid as $id => $q) {
+        $key = (string)$id;
+        $queriesforjs->$key = ['id' => $q->id, 'querytext' => $q->querytext];
+    }
     $PAGE->requires->js_call_amd('report_querybuilder/toolbar', 'init', [
         ['queries' => $queriesforjs],
     ]);
@@ -517,7 +519,8 @@ if ($advanced) {
         'style' => 'display:none;',
     ]);
     echo html_writer::end_div();
-    echo html_writer::tag('small',
+    echo html_writer::tag(
+        'small',
         get_string('sql_editor_help', 'report_querybuilder'),
         ['class' => 'text-muted mt-1 d-block']
     );
@@ -580,10 +583,10 @@ if (!$advanced) {
 
     // Optional: Show a warning if SQL is too complex.
     if (!empty($sqlparam) && !$builderstate) {
-	echo $OUTPUT->notification(
-        get_string('sql_too_complex', 'report_querybuilder'),
-        'warning'
-	);
+        echo $OUTPUT->notification(
+            get_string('sql_too_complex', 'report_querybuilder'),
+            'warning'
+        );
     }
 
     $form = new builder_form(null, [

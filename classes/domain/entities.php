@@ -44,7 +44,6 @@ namespace report_querybuilder\domain;
  * Use TO_TIMESTAMP(columnname) in raw SQL to convert for display.
  */
 class entities {
-
     /**
      * Returns the built-in entity definitions for the Query Builder.
      *

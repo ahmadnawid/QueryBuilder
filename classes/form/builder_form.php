@@ -38,7 +38,6 @@ use report_querybuilder\domain\entities;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class builder_form extends \moodleform {
-
     /**
      * Defines the form elements for the visual query builder.
      *
