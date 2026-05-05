@@ -24,8 +24,6 @@
 
 namespace report_querybuilder\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy provider for report_querybuilder.
  *
