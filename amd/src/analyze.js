@@ -17,45 +17,62 @@
  * AMD module for Query Builder explain plan analyzer.
  *
  * @module     report_querybuilder/analyze
+ * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], function(Ajax, Str, Notification, Templates) {
 
     /**
-     * Render loading state.
+     * Render loading state into the table container.
+     *
+     * @param {HTMLElement} tablebox The container element for the table.
+     * @returns {Promise} Resolved when rendering is complete.
      */
     function showLoading(tablebox) {
-        // eslint-disable-next-line promise/no-nesting
         return Templates.render('report_querybuilder/explain_loading', {
             message: 'Running EXPLAIN, please wait...'
         }).then(function(html) {
             tablebox.innerHTML = html;
+            return;
         }).catch(Notification.exception);
     }
 
     /**
-     * Render warnings.
+     * Render warnings into the warnings container.
+     *
+     * @param {HTMLElement} warnbox The container element for warnings.
+     * @param {Object} warningsdata The warnings data object to render.
+     * @returns {Promise} Resolved when rendering is complete.
      */
     function renderWarnings(warnbox, warningsdata) {
-        // eslint-disable-next-line promise/no-nesting
         return Templates.render('report_querybuilder/explain_warnings', warningsdata)
             .then(function(html) {
                 warnbox.innerHTML = html;
+                return;
             }).catch(Notification.exception);
     }
 
     /**
-     * Render table.
+     * Render the explain plan table.
+     *
+     * @param {HTMLElement} tablebox The container element for the table.
+     * @param {HTMLElement} panel The explain panel element to scroll into view.
+     * @param {Object} tabledata The table data object to render.
+     * @returns {Promise} Resolved when rendering is complete.
      */
     function renderTable(tablebox, panel, tabledata) {
-        // eslint-disable-next-line promise/no-nesting
         return Templates.render('report_querybuilder/explain_table', tabledata)
             .then(function(html) {
                 tablebox.innerHTML = html;
                 panel.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                return;
             }).catch(Notification.exception);
     }
 
     return {
+        /**
+         * Initialise the analyze module.
+         */
         init: function() {
 
             var btn = document.getElementById('analyzebtn');
@@ -139,14 +156,15 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                             warnings: (data.warnings || []).map(function(w) {
                                 return {
                                     message: w.message,
-                                    is_danger: w.level === 'danger'
+                                    isDanger: w.level === 'danger'
                                 };
                             })
                         };
 
-                        return renderWarnings(warnbox, warningsdata).then(function() {
-                            return {str: str, data: data};
-                        });
+                        return renderWarnings(warnbox, warningsdata)
+                            .then(function() {
+                                return {str: str, data: data};
+                            });
                     })
                     .then(function(payload) {
                         var str = payload.str;
@@ -221,11 +239,11 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
 
                         var errmsg = err.message || err.error || JSON.stringify(err);
 
-                        // eslint-disable-next-line promise/no-nesting
                         Templates.render('report_querybuilder/explain_loading', {
                             message: 'Error: ' + errmsg
                         }).then(function(html) {
                             tablebox.innerHTML = html;
+                            return;
                         }).catch(Notification.exception);
                     });
             });
