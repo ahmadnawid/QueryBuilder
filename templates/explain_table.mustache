@@ -36,3 +36,35 @@
         {{/steps}}
     </tbody>
 </table>
+
+{{!
+Example context:
+{
+    "col_node": "Node",
+    "col_relation": "Relation",
+    "col_index": "Index",
+    "col_rows": "Rows",
+    "col_cost": "Cost",
+    "col_filter": "Filter",
+    "steps": [
+        {
+            "row_class": "depth-0",
+            "node_cell": "<strong>Seq Scan</strong>",
+            "relation": "users",
+            "index_cell": "",
+            "rows_formatted": "12,345",
+            "cost_total": "10.23",
+            "filter": "id > 0"
+        },
+        {
+            "row_class": "depth-1",
+            "node_cell": "<strong>Index Scan</strong>",
+            "relation": "user_enrolments",
+            "index_cell": "idx_userid ON (userid)",
+            "rows_formatted": "1,234",
+            "cost_total": "2.11",
+            "filter": ""
+        }
+    ]
+}
+}}
