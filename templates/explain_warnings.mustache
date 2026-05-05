@@ -21,3 +21,22 @@
 {{^has_warnings}}
 <div class="alert alert-success">&#10004; {{no_warnings_message}}</div>
 {{/has_warnings}}
+
+{{!
+Example context:
+{
+    "has_warnings": true,
+    "warnings_heading": "Warnings",
+    "warnings": [
+        {
+            "is_danger": true,
+            "message": "Sequential scan detected — no index used."
+        },
+        {
+            "is_danger": false,
+            "message": "Estimated rows exceed 100,000."
+        }
+    ],
+    "no_warnings_message": "No warnings detected."
+}
+}}
