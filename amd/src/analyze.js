@@ -1,4 +1,4 @@
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,10 +17,43 @@
  * AMD module for Query Builder explain plan analyzer.
  *
  * @module     report_querybuilder/analyze
- * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], function(Ajax, Str, Notification, Templates) {
+
+    /**
+     * Render loading state.
+     */
+    function showLoading(tablebox) {
+        // eslint-disable-next-line promise/no-nesting
+        return Templates.render('report_querybuilder/explain_loading', {
+            message: 'Running EXPLAIN, please wait...'
+        }).then(function(html) {
+            tablebox.innerHTML = html;
+        }).catch(Notification.exception);
+    }
+
+    /**
+     * Render warnings.
+     */
+    function renderWarnings(warnbox, warningsdata) {
+        // eslint-disable-next-line promise/no-nesting
+        return Templates.render('report_querybuilder/explain_warnings', warningsdata)
+            .then(function(html) {
+                warnbox.innerHTML = html;
+            }).catch(Notification.exception);
+    }
+
+    /**
+     * Render table.
+     */
+    function renderTable(tablebox, panel, tabledata) {
+        // eslint-disable-next-line promise/no-nesting
+        return Templates.render('report_querybuilder/explain_table', tabledata)
+            .then(function(html) {
+                tablebox.innerHTML = html;
+                panel.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }).catch(Notification.exception);
+    }
 
     return {
         init: function() {
@@ -55,13 +88,7 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                 panel.style.display = 'block';
                 warnbox.innerHTML = '';
 
-                // Show loading state via template.
-                Templates.render('report_querybuilder/explain_loading', {
-                    message: 'Running EXPLAIN, please wait...'
-                }).then(function(html) {
-                    tablebox.innerHTML = html;
-                    return;
-                }).catch(Notification.exception);
+                showLoading(tablebox);
 
                 Str.get_strings([
                     {key: 'explain_error', component: 'report_querybuilder'},
@@ -74,33 +101,41 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                     {key: 'explain_cost', component: 'report_querybuilder'},
                     {key: 'explain_filter', component: 'report_querybuilder'},
                     {key: 'analyze_query', component: 'report_querybuilder'}
-                ]).then(function(strings) {
-
-                    var strError = strings[0];
-                    var strWarnings = strings[1];
-                    var strNowarn = strings[2];
-                    var strNode = strings[3];
-                    var strRelation = strings[4];
-                    var strIndex = strings[5];
-                    var strRows = strings[6];
-                    var strCost = strings[7];
-                    var strFilter = strings[8];
-                    var strAnalyze = strings[9];
-
-                    return Ajax.call([{
-                        methodname: 'report_querybuilder_analyze_query',
-                        args: {sql: sql}
-                    }])[0].then(function(data) {
+                ])
+                    .then(function(strings) {
+                        return {
+                            strError: strings[0],
+                            strWarnings: strings[1],
+                            strNowarn: strings[2],
+                            strNode: strings[3],
+                            strRelation: strings[4],
+                            strIndex: strings[5],
+                            strRows: strings[6],
+                            strCost: strings[7],
+                            strFilter: strings[8],
+                            strAnalyze: strings[9]
+                        };
+                    })
+                    .then(function(str) {
+                        return Ajax.call([{
+                            methodname: 'report_querybuilder_analyze_query',
+                            args: {sql: sql}
+                        }])[0].then(function(data) {
+                            return {str: str, data: data};
+                        });
+                    })
+                    .then(function(payload) {
+                        var str = payload.str;
+                        var data = payload.data;
 
                         btn.disabled = false;
                         spinner.style.display = 'none';
-                        btn.textContent = strAnalyze;
+                        btn.textContent = str.strAnalyze;
 
-                        // Render warnings via template.
                         var warningsdata = {
                             'has_warnings': data.warnings && data.warnings.length > 0,
-                            'warnings_heading': strWarnings,
-                            'no_warnings_message': strNowarn,
+                            'warnings_heading': str.strWarnings,
+                            'no_warnings_message': str.strNowarn,
                             warnings: (data.warnings || []).map(function(w) {
                                 return {
                                     message: w.message,
@@ -109,23 +144,23 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                             })
                         };
 
-                        // eslint-disable-next-line promise/no-nesting
-                        Templates.render('report_querybuilder/explain_warnings', warningsdata)
-                            .then(function(html) {
-                                warnbox.innerHTML = html;
-                                return;
-                            }).catch(Notification.exception);
+                        return renderWarnings(warnbox, warningsdata).then(function() {
+                            return {str: str, data: data};
+                        });
+                    })
+                    .then(function(payload) {
+                        var str = payload.str;
+                        var data = payload.data;
 
-                        // Build steps data for table template.
                         var steps = (data.steps || []).map(function(step) {
                             var lnode = step.node_type ? step.node_type.toLowerCase() : '';
                             var rowclass = '';
 
                             if (step.warnings && step.warnings.length > 0) {
-                                var hasdan = step.warnings.some(function(w) {
+                                var hasDanger = step.warnings.some(function(w) {
                                     return w.level === 'danger';
                                 });
-                                rowclass = hasdan ? 'table-danger' : 'table-warning';
+                                rowclass = hasDanger ? 'table-danger' : 'table-warning';
                             }
 
                             var indent = '';
@@ -142,59 +177,57 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                             }
 
                             var noindex = ['sort', 'hash', 'nested loop', 'merge join', 'hash join', 'aggregate'];
-                            var isnoindexnode = noindex.some(function(t) {
+                            var isNoIndexNode = noindex.some(function(t) {
                                 return lnode.indexOf(t) !== -1;
                             });
-                            var indexcell = step.index
-                                ? '<span class="badge bg-success">' + step.index + '</span>'
-                                : isnoindexnode
-                                    ? '<span class="text-muted">&#8212;</span>'
-                                    : '<span class="badge bg-danger">(none)</span>';
+
+                            var indexcell = '';
+                            if (step.index) {
+                                indexcell = '<span class="badge bg-success">' + step.index + '</span>';
+                            } else if (isNoIndexNode) {
+                                indexcell = '<span class="text-muted">&#8212;</span>';
+                            } else {
+                                indexcell = '<span class="badge bg-danger">(none)</span>';
+                            }
 
                             return {
-                                row_class: rowclass,
-                                node_cell: nodecell,
-                                relation: step.relation || '',
-                                index_cell: indexcell,
-                                rows_formatted: step.rows_est !== null
+                                'row_class': rowclass,
+                                'node_cell': nodecell,
+                                'relation': step.relation || '',
+                                'index_cell': indexcell,
+                                'rows_formatted': step.rows_est !== null
                                     ? Number(step.rows_est).toLocaleString()
                                     : '',
-                                cost_total: step.cost_total !== null ? step.cost_total : '',
-                                filter: step.filter || ''
+                                'cost_total': step.cost_total !== null ? step.cost_total : '',
+                                'filter': step.filter || ''
                             };
                         });
 
                         var tabledata = {
-                            col_node: strNode,
-                            col_relation: strRelation,
-                            col_index: strIndex,
-                            col_rows: strRows,
-                            col_cost: strCost,
-                            col_filter: strFilter,
-                            steps: steps
+                            'col_node': str.strNode,
+                            'col_relation': str.strRelation,
+                            'col_index': str.strIndex,
+                            'col_rows': str.strRows,
+                            'col_cost': str.strCost,
+                            'col_filter': str.strFilter,
+                            'steps': steps
                         };
 
-                        // eslint-disable-next-line promise/no-nesting
-                        Templates.render('report_querybuilder/explain_table', tabledata)
-                            .then(function(html) {
-                                tablebox.innerHTML = html;
-                                panel.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-                                return;
-                            }).catch(Notification.exception);
-
-                        return;
-                    }).catch(function(err) {
+                        return renderTable(tablebox, panel, tabledata);
+                    })
+                    .catch(function(err) {
                         btn.disabled = false;
                         spinner.style.display = 'none';
+
                         var errmsg = err.message || err.error || JSON.stringify(err);
+
+                        // eslint-disable-next-line promise/no-nesting
                         Templates.render('report_querybuilder/explain_loading', {
-                            message: strError + ' ' + errmsg
+                            message: 'Error: ' + errmsg
                         }).then(function(html) {
                             tablebox.innerHTML = html;
-                            return;
                         }).catch(Notification.exception);
                     });
-                }).catch(Notification.exception);
             });
         }
     };
