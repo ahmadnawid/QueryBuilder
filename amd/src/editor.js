@@ -23,10 +23,10 @@
 define([], function() {
     return {
         init: function() {
-            var toggle      = document.getElementById('modeswitchbtn');
-            var textarea    = document.getElementById('advsql');
+            var toggle = document.getElementById('modeswitchbtn');
+            var textarea = document.getElementById('advsql');
             var hiddenquery = document.getElementById('hiddenquery');
-            var saveform    = document.getElementById('savequeryform');
+            var saveform = document.getElementById('savequeryform');
 
             if (toggle && textarea) {
                 toggle.addEventListener('click', function(e) {

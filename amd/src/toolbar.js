@@ -41,17 +41,17 @@ define([], function() {
                     textarea.value = queries[id].querytext;
                 }
                 if (editbtn) {
-		    editbtn.disabled = !id; 
-		}
-                if (delbtn) { 
-		    delbtn.disabled = !id; 
-		}
-                if (editid) { 
-		    editid.value = id;
-	        }
-                if (delid) { 
-		    delid.value = id; 
-		}
+            editbtn.disabled = !id;
+        }
+                if (delbtn) {
+            delbtn.disabled = !id;
+        }
+                if (editid) {
+            editid.value = id;
+            }
+                if (delid) {
+            delid.value = id;
+        }
             });
         }
     };
