@@ -134,6 +134,7 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                         };
                     })
                     .then(function(str) {
+			// eslint-disable-next-line promise/no-nesting
                         return Ajax.call([{
                             methodname: 'report_querybuilder_analyze_query',
                             args: {sql: sql}
@@ -160,7 +161,7 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                                 };
                             })
                         };
-
+			// eslint-disable-next-line promise/no-nesting
                         return renderWarnings(warnbox, warningsdata)
                             .then(function() {
                                 return {str: str, data: data};
@@ -238,7 +239,7 @@ define(['core/ajax', 'core/str', 'core/notification', 'core/templates'], functio
                         spinner.style.display = 'none';
 
                         var errmsg = err.message || err.error || JSON.stringify(err);
-
+			// eslint-disable-next-line promise/no-nesting
                         Templates.render('report_querybuilder/explain_loading', {
                             message: 'Error: ' + errmsg
                         }).then(function(html) {

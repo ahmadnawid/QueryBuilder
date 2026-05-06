@@ -23,13 +23,13 @@
 define([], function() {
     return {
         init: function(params) {
-            var queries  = params.queries || {};
-            var select   = document.getElementById('loadqueryselect');
+            var queries = params.queries || {};
+            var select = document.getElementById('loadqueryselect');
             var textarea = document.getElementById('advsql');
-            var editbtn  = document.getElementById('editquerybtn');
-            var delbtn   = document.getElementById('deletequerybtn');
-            var editid   = document.getElementById('editloadquery');
-            var delid    = document.getElementById('deleteloadquery');
+            var editbtn = document.getElementById('editquerybtn');
+            var delbtn = document.getElementById('deletequerybtn');
+            var editid = document.getElementById('editloadquery');
+            var delid = document.getElementById('deleteloadquery');
 
             if (!select || !textarea) {
                 return;
@@ -40,10 +40,18 @@ define([], function() {
                 if (id && queries[id]) {
                     textarea.value = queries[id].querytext;
                 }
-                if (editbtn)  { editbtn.disabled  = !id; }
-                if (delbtn)   { delbtn.disabled    = !id; }
-                if (editid)   { editid.value  = id; }
-                if (delid)    { delid.value   = id; }
+                if (editbtn) {
+		    editbtn.disabled = !id; 
+		}
+                if (delbtn) { 
+		    delbtn.disabled = !id; 
+		}
+                if (editid) { 
+		    editid.value = id;
+	        }
+                if (delid) { 
+		    delid.value = id; 
+		}
             });
         }
     };
