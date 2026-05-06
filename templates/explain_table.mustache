@@ -1,16 +1,62 @@
 {{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
     @template report_querybuilder/explain_table
 
     Explain plan results table.
 
     Context variables:
-    * col_node - Column header string
-    * col_relation - Column header string
-    * col_index - Column header string
-    * col_rows - Column header string
-    * col_cost - Column header string
-    * col_filter - Column header string
+    * col_node - Column header for node type
+    * col_relation - Column header for relation
+    * col_index - Column header for index
+    * col_rows - Column header for rows
+    * col_cost - Column header for cost
+    * col_filter - Column header for filter
     * steps - Array of step objects
+
+    Example context (json):
+    {
+        "col_node": "Node",
+        "col_relation": "Relation",
+        "col_index": "Index",
+        "col_rows": "Rows",
+        "col_cost": "Cost",
+        "col_filter": "Filter",
+        "steps": [
+            {
+                "row_class": "table-danger",
+                "node_cell": "<span class=\"badge bg-danger me-1\">SEQ SCAN</span>",
+                "relation": "mdl_user",
+                "index_cell": "<span class=\"badge bg-danger\">(none)</span>",
+                "rows_formatted": "12,345",
+                "cost_total": "10.23",
+                "filter": "id > 0"
+            },
+            {
+                "row_class": "",
+                "node_cell": "<span class=\"badge bg-success me-1\">INDEX</span> Scan",
+                "relation": "mdl_user_enrolments",
+                "index_cell": "<span class=\"badge bg-success\">idx_userid</span>",
+                "rows_formatted": "1,234",
+                "cost_total": "2.11",
+                "filter": ""
+            }
+        ]
+    }
 }}
 <table class="table table-sm table-bordered generaltable">
     <thead class="table-dark">
@@ -36,34 +82,3 @@
         {{/steps}}
     </tbody>
 </table>
-{{!
-Example context:
-{
-    "col_node": "Node",
-    "col_relation": "Relation",
-    "col_index": "Index",
-    "col_rows": "Rows",
-    "col_cost": "Cost",
-    "col_filter": "Filter",
-    "steps": [
-        {
-            "row_class": "depth-0",
-            "node_cell": "<strong>Seq Scan</strong>",
-            "relation": "users",
-            "index_cell": "",
-            "rows_formatted": "12,345",
-            "cost_total": "10.23",
-            "filter": "id > 0"
-        },
-        {
-            "row_class": "depth-1",
-            "node_cell": "<strong>Index Scan</strong>",
-            "relation": "user_enrolments",
-            "index_cell": "idx_userid ON (userid)",
-            "rows_formatted": "1,234",
-            "cost_total": "2.11",
-            "filter": ""
-        }
-    ]
-}
-}}
