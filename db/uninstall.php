@@ -21,9 +21,6 @@
  * @copyright  2026 Ahmad Nawid Mustafazada <ahmadnawid.mz@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Custom uninstallation procedure.
  *
